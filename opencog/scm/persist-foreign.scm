@@ -6,7 +6,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog persist))
-(use-modules (opencog as-config))
+(use-modules (opencog fdi-config))
 (load-extension (string-append opencog-ext-path-persist-fdi "libpersist-fdi") "opencog_persist_fdi_init")
 
 ;;; (export )
