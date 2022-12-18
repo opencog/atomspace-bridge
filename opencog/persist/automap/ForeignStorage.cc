@@ -163,7 +163,7 @@ std::string ForeignStorage::monitor(void)
 	}
 
 	rs += "Connected to `" + _name + "`\n";
-	rs += "Number of loaded tables: " + std::to_string(_num_tables);
+	rs += "Number of loaded tables: " + std::to_string(_num_tables) + "\n";
 	return rs;
 }
 

@@ -62,5 +62,11 @@ WHERE
     -- AND pg_namespace.nspname = 'my_schema'
     AND pg_class.relname = 'allele_stock' ;
 
+==========
+
+SELECT * FROM cell_line;
+cell_line_id |  name   | uniquename  | organism_id |  timeaccessioned  |  timelastmodified  | is_obsolete
+
+
 
 -------

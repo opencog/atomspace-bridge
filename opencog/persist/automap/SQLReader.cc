@@ -62,8 +62,7 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	std::string buff =
 		"SELECT column_name AS c, udt_name AS t "
 		"FROM information_schema.columns "
-		"WHERE table_name = '" + tablename + "' "
-		"ORDER BY c;";
+		"WHERE table_name = '" + tablename + "';";
 
 	Response rp(conn_pool);
 	rp.exec(buff);
@@ -83,10 +82,9 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	//                 Variable "symbol"
 	//                 Type 'GeneNode
 
-	Handle tabc = _atom_space->add_link(LIST_LINK, std::move(tcols));
+	Handle tabc = _atom_space->add_link(VARIABLE_LIST, std::move(tcols));
 	Handle tabn = _atom_space->add_node(PREDICATE_NODE, std::string(tablename));
-	Handle tabe = _atom_space->add_link(EVALUATION_LINK, tabn, tabc);
-	Handle tabs = _atom_space->add_link(SIGNATURE_LINK, tabe);
+	Handle tabs = _atom_space->add_link(SIGNATURE_LINK, tabn, tabc);
 	printf("============= Loaded table ==>%s<==\n", tablename.c_str());
 
 	return tabs;
@@ -114,17 +112,43 @@ printf("duude found %lu tables\n", _num_tables);
 
 /* ================================================================ */
 
+/// Load all rows in the table identified by the predicate.
 void ForeignStorage::load_table_data(const Handle& hp)
 {
-	std::string buff =
-		"SELECT * FROM " + hp->get_name() +
-		" ORDER BY column_name;";
+	// We are expecting this:
+	//   Signature
+	//       Predicate "some table"  <-- this is hp above
+	//       List
+	//           TypedVariable
+	//               Variable "column name"
+	//               Type 'AtomType
+	//           ...
+	HandleSeq sigs = hp->getIncomingSetByType(SIGNATURE_LINK);
+	if (1 != sigs.size())
+		throw RuntimeException(TRACE_INFO,
+			"Cannot find signature for %s\n",
+			hp->to_short_string().c_str());
+
+	std::string buff = "SELECT ";
+
+	// listl will be a ListLink; tvl will be a TypedVariableLink
+	Handle listl = sigs[0]->getOutgoingAtom(1);
+	for (const Handle& tvl : listl->getOutgoingSet())
+	{
+		buff += tvl->getOutgoingAtom(0)->get_name();
+		buff += ", ";
+	}
+
+	buff.pop_back();
+	buff.pop_back();
+	buff += " FROM " + hp->get_name() + ";";
 
 	Response rp(conn_pool);
 	rp.exec(buff);
 
 	rp.as = _atom_space;
 	rp.pred = hp;
+	rp.varl = listl;
 	rp.rs->foreach_row(&Response::tabledata_cb, &rp);
 }
 

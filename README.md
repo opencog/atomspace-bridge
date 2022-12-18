@@ -104,16 +104,15 @@ The type of each variable *aka* column is given.
  DefineLink
     DefinedSchema "tablename"
     Signature
-       Evaluation
-          Predicate "tablename"
-          List
-             TypedVariable
-                 Variable "name of column 1"
-                 Type 'ConceptNode  ;; For SQL text/varchar
-             TypedVariable
-                 Variable "name of column 2"
-                 Type 'NumberNode  ;; For SQL numbers
-             ...
+       Predicate "tablename"
+       List
+          TypedVariable
+              Variable "name of column 1"
+              Type 'ConceptNode  ;; For SQL text/varchar
+          TypedVariable
+              Variable "name of column 2"
+              Type 'NumberNode  ;; For SQL numbers
+          ...
 ```
 
 See the OpenCog wiki:
@@ -187,22 +186,21 @@ which could be marginally more efficient, presuming that the
  DefineLink
     DefinedSchema "gene.allele"
     Signature
-       Evaluation
-          Predicate "gene.allele"
-          List
-             TypedVariable
-                 Variable "symbol"
-                 Type 'GeneNode
-             TypedVariable
-                 Variable "is_alleleof"
-                 Type 'NumberNode
-             TypedVariable
-                 Variable "propagate_transgenic_uses"
-                 Type 'NumberNode
-             TypedVariable
-                 Variable "gene_is_regulatory_region"
-                 Type 'NumberNode
-             ...
+       Predicate "gene.allele"
+       List
+          TypedVariable
+              Variable "symbol"
+              Type 'GeneNode
+          TypedVariable
+              Variable "is_alleleof"
+              Type 'NumberNode
+          TypedVariable
+              Variable "propagate_transgenic_uses"
+              Type 'NumberNode
+          TypedVariable
+              Variable "gene_is_regulatory_region"
+              Type 'NumberNode
+          ...
 ```
 
 Building and Installing
