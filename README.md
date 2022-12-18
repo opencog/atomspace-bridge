@@ -17,6 +17,8 @@ The following are desired features:
   representations.
 * Both the reading and the update of the SQL tables is possible.
 
+This could be called a "Foreign Data Interface" (FDI) to the AtomSpace.
+
 Status
 ------
 ***Version 0.0.0 ***
@@ -33,8 +35,10 @@ into the AtomSpace, using the
 [Chado](http://gmod.org/wiki/Chado)
 schema given [here](http://gmod.org/wiki/Chado_Tables).
 
-Attempt #1
-----------
+Generic Mapping
+---------------
+Here's a sketch for a generic mapping.
+
 For each row in tablename, create a conventional EvaluationLink.
 It contains *only* the columns that are not foreign keys:
 ```
@@ -62,7 +66,57 @@ For each row in tablename having a column that is a foreign key:
 				List
 					Concept ...
 ```
+See the OpenCog wiki:
+* [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink]
+* [PredicateNode](https://wiki.opencog.org/w/PredicateNode)
 
-That's it. Is there more?
+
+Table Schemas
+-------------
+SQL table definitions are schemas that provide a definition of the
+columns of that table.  It is presumably useful to import these into
+the AtomSpace. Below is a proposed mapping.
+
+```
+ DefineLink
+     DefinedSchema "tablename"
+     SignatureLink
+        Evaluation
+            Predicate "tablename"
+            List
+                TypeNode 'ConceptNode  ;; For SQL text/varchar
+                TypeNode 'ConceptNode
+                ...
+                TypeNode 'NumberNode   ;; For SQL numbers
+```
+
+See the OpenCog wiki:
+* [DefineLink](https://wiki.opencog.org/w/DefineLink]
+* [DefinedSchemaNode](https://wiki.opencog.org/w/DefinedSchemaNode]
+* [SignatureLink](https://wiki.opencog.org/w/SignatureLink]
+* [TypeNode](https://wiki.opencog.org/w/TypeNode]
+
+Using
+-----
+Examples of accessing data in a foreign database.
+
+```
+; Describe where it is located.
+(define foreign-db
+	(ForeignStoreageNode "postgres://example.com/foo?user=foo&passwd=bar"))
+
+; Open it.
+(cog-open foreign-db)
+
+; Load the *entire* table `gene.allele`. Optional; only if you actually
+; want the whole table in RAM. We know the table name, and we know that
+; we'll be mapping rows to the EvaluationLink.
+(fetch-incoming-by-type (Predicate "gene.allele") 'EvaluationLink)
+
+; Instead of loading entire tables, perhaps we only want all rows of
+; all tables that mention gene CG7069.
+; (Concept "CG7069")
+
+```
 
 -----------------------------------------------------------------------
