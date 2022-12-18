@@ -27,15 +27,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <filesystem>
-#include <sys/resource.h>
-
-#include <opencog/util/Logger.h>
+#include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/persist/storage/storage_types.h>
 
 #include "ForeignStorage.h"
 
+#include "ll-pg-cxx.h"
+
 using namespace opencog;
+
+// Hard-code to 3 threads for now
+#define POOL_SIZE 3
 
 /* ================================================================ */
 // Constructors
@@ -49,26 +53,19 @@ void ForeignStorage::init(const char * uri)
 
 }
 
-void ForeignStorage::open()
-{
-	// User might call us twice. If so, ignore the second call.
-	// if (_rfile) return;
-	init(_name.c_str());
-}
-
 ForeignStorage::ForeignStorage(std::string uri) :
 	StorageNode(FOREIGN_STORAGE_NODE, std::move(uri))
 {
 	const char *yuri = _name.c_str();
 
-	// We expect the URI to be for the form (note: three slashes)
-	//    rocks:///path/to/file
 	if (strncmp(yuri, "rocks://", URIX_LEN))
 		throw IOException(TRACE_INFO,
 			"Unknown URI '%s'\nValid URI's start with 'rocks://'\n", yuri);
 
-	_uri = "rocks://" + file;
+	// _uri = "rocks://" + file;
 	_name = _uri;
+	_initial_conn_pool_size = 0;
+	_is_open = false;
 }
 
 ForeignStorage::~ForeignStorage()
@@ -76,9 +73,44 @@ ForeignStorage::~ForeignStorage()
 	close();
 }
 
-void ForeignStorage::close()
+/* ================================================================ */
+// Connections and opening
+
+void ForeignStorage::enlarge_conn_pool(int delta, const char* uri)
 {
-	// if (nullptr == _rfile) return;
+	if (0 >= delta) return;
+	for (int i=0; i<delta; i++)
+	{
+		LLConnection* db_conn = new LLPGConnection(uri);
+		conn_pool.push(db_conn);
+	}
+
+	_initial_conn_pool_size += delta;
+}
+
+// Public function
+void ForeignStorage::open(void)
+{
+	// User might call us twice. If so, ignore the second call.
+	if (_is_open) return;
+
+	if (0 == _initial_conn_pool_size)
+		enlarge_conn_pool(POOL_SIZE, _name.c_str());
+
+	if (!connected()) return;
+
+	_is_open = true;
+
+	// We don't really need to do this...
+	get_server_version();
+}
+
+void ForeignStorage::close(void)
+{
+	if (_is_open) return;
+
+	close_conn_pool();
+	_is_open = false;
 }
 
 std::string ForeignStorage::get_version(void)
@@ -88,8 +120,26 @@ std::string ForeignStorage::get_version(void)
 
 bool ForeignStorage::connected(void)
 {
-	// return nullptr != _rfile;
-	return false;
+	if (0 == _is_open) return false;
+	if (0 == _initial_conn_pool_size) return false;
+
+	// This will leak a resource, if db_conn->connected() ever throws.
+	LLConnection* db_conn = conn_pool.value_pop();
+	bool have_connection = db_conn->connected();
+	conn_pool.push(db_conn);
+	return have_connection;
+}
+
+void ForeignStorage::close_conn_pool(void)
+{
+   // flushStoreQueue();
+
+   while (not conn_pool.is_empty())
+   {
+      LLConnection* db_conn = conn_pool.value_pop();
+      delete db_conn;
+   }
+   _initial_conn_pool_size = 0;
 }
 
 /* ================================================================== */

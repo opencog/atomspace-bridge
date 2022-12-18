@@ -37,6 +37,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/api/StorageNode.h>
 
+#include "llapi.h"
+
 namespace opencog
 {
 /** \addtogroup grp_persist
@@ -48,6 +50,19 @@ class ForeignStorage : public StorageNode
 	private:
 		void init(const char *);
 		std::string _uri;
+
+		// Pool of shared connections
+		concurrent_stack<LLConnection*> conn_pool;
+		int _initial_conn_pool_size;
+		void enlarge_conn_pool(int, const char*);
+		void close_conn_pool(void);
+
+		// Utility for handling responses (on stack).
+		class Response;
+
+		bool _is_open;
+		int _server_version;
+		void get_server_version(void);
 
 	public:
 		ForeignStorage(std::string uri);
@@ -63,7 +78,7 @@ class ForeignStorage : public StorageNode
 		void destroy(void) { kill_data(); /* TODO also delete the db */ }
 		void erase(void) { kill_data(); }
 
-		void kill_data(void); // destroy DB contents
+		void kill_data(void) {} // destroy DB contents
 		void print_range(const std::string&); // Debugging utility
 
 		// AtomStorage interface
@@ -79,7 +94,7 @@ class ForeignStorage : public StorageNode
 		void loadType(AtomSpace*, Type);
 		void loadAtomSpace(AtomSpace*); // Load entire contents
 		void storeAtomSpace(const AtomSpace*); // Store entire contents
-		HandleSeq loadFrameDAG(void) {return HandleSeq(); 
+		HandleSeq loadFrameDAG(void) {return HandleSeq(); }
 		void storeFrameDAG(AtomSpace*) {}
 		void deleteFrame(AtomSpace*) {}
 		void barrier(AtomSpace* = nullptr);

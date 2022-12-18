@@ -29,7 +29,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_PGSQL_STORAGE
+#ifdef HAVE_PGSQL
 
 #include <libpq-fe.h>
 
@@ -233,5 +233,5 @@ LLPGRecordSet::fetch_row(void)
 	return true;
 }
 
-#endif /* HAVE_PGSQL_STORAGE */
+#endif /* HAVE_PGSQL */
 /* ============================= END OF FILE ================= */

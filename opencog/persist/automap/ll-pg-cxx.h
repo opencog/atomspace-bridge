@@ -25,9 +25,9 @@
 #ifndef _OPENCOG_PERSISTENT_POSTGRES_DRIVER_H
 #define _OPENCOG_PERSISTENT_POSTGRES_DRIVER_H
 
-#ifdef HAVE_PGSQL_STORAGE
+#ifdef HAVE_PGSQL
 
-#include <libpq-fe.h>
+#include <postgresql/libpq-fe.h>
 
 #include "llapi.h"
 
@@ -76,5 +76,5 @@ class LLPGRecordSet : public LLRecordSet
 
 /** @}*/
 
-#endif /* HAVE_PGSQL_STORAGE */
+#endif /* HAVE_PGSQL */
 #endif // _OPENCOG_PERSISTENT_POSTGRES_DRIVER_H
