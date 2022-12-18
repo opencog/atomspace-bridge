@@ -21,8 +21,8 @@ This could be called a "Foreign Data Interface" (FDI) to the AtomSpace.
 
 Status
 ------
-***Version 0.0.0*** -- At this time, this is just a collection of
-design notes; nothing has been implemented.
+***Version 0.0.1*** -- Mostly a collection of design notes. Initial
+boilerplate to connect to Postgres,
 
 History
 -------
