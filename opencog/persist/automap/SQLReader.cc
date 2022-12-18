@@ -53,6 +53,13 @@ void ForeignStorage::get_server_version(void)
 
 /* ================================================================ */
 
+void ForeignStorage::load_schemas(void)
+{
+	printf("hello world!\n");
+}
+
+/* ================================================================ */
+
 void ForeignStorage::getAtom(const Handle&)
 {
 }

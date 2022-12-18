@@ -40,8 +40,8 @@ using namespace opencog;
 
 ForeignPersistSCM::ForeignPersistSCM(AtomSpace *as)
 {
-	//if (as)
-	//	_as = AtomSpaceCast(as->shared_from_this());
+	if (as)
+		_as = AtomSpaceCast(as->shared_from_this());
 
 	static bool is_init = false;
 	if (is_init) return;
@@ -64,11 +64,24 @@ void ForeignPersistSCM::init_in_module(void* data)
 
 void ForeignPersistSCM::init(void)
 {
-	// define_scheme_primitive("cog-foreign-open", &ForeignPersistSCM::do_open, this, "persist-foreign");
+	define_scheme_primitive("cog-foreign-load-schemas",
+		&ForeignPersistSCM::do_load_schemas, this, "persist-foreign");
 }
 
 ForeignPersistSCM::~ForeignPersistSCM()
 {
+}
+
+void ForeignPersistSCM::do_load_schemas(const Handle& ston)
+{
+	ForeignStorageNodePtr stnp = ForeignStorageNodeCast(ston);
+
+	if (nullptr == stnp)
+		throw RuntimeException(TRACE_INFO,
+			"cog-foreign-load-schemas: Error: Bad StorageNode! Got %s",
+			ston->to_short_string().c_str());
+
+	stnp->load_schemas();
 }
 
 void opencog_persist_fdi_init(void)

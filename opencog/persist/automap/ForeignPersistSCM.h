@@ -40,11 +40,14 @@ private:
 	static void init_in_module(void*);
 	void init(void);
 
-	// AtomSpacePtr _as;
+	AtomSpacePtr _as;
 
 public:
 	ForeignPersistSCM(AtomSpace*);
 	~ForeignPersistSCM();
+
+	void do_load_schemas(const Handle&);
+
 }; // class
 
 /** @}*/

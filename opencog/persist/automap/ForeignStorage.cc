@@ -103,6 +103,7 @@ void ForeignStorage::open(void)
 
 	// We don't really need to do this...
 	get_server_version();
+printf("Connected to Postgres server version %d\n", _server_version);
 }
 
 void ForeignStorage::close(void)
@@ -156,7 +157,7 @@ void ForeignStorage::clear_stats(void)
 std::string ForeignStorage::monitor(void)
 {
 	std::string rs;
-	rs += "Connected to `" + _uri + "`\n";
+	rs += "Connected to `" + _name + "`\n";
 	return rs;
 }
 

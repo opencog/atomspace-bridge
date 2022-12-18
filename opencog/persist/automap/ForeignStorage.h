@@ -102,6 +102,9 @@ class ForeignStorage : public StorageNode
 		// Debugging and performance monitoring
 		void print_stats(void);
 		void clear_stats(void); // reset stats counters.
+
+		// Extra functions
+		void load_schemas(void);
 };
 
 class ForeignStorageNode : public ForeignStorage

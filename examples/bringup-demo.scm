@@ -17,6 +17,16 @@
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-foreign))
 
+; Declare the location of the database
 (define flystore (ForeignStorageNode "postgres://flybase"))
 
+; Open it.
 (cog-open flystore)
+
+; What's up, Doc?
+(monitor-storage flystore)
+
+; Start bulldozing around.
+(cog-foreign-load-schemas flystore)
+
+(cog-close flystore)
