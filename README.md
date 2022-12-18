@@ -21,7 +21,7 @@ This could be called a "Foreign Data Interface" (FDI) to the AtomSpace.
 
 Status
 ------
-***Version 0.0.0 ***
+***Version 0.0.0***
 At this time, this is just a collection of design notes; nothing has
 been implemented.
 
@@ -42,29 +42,29 @@ Here's a sketch for a generic mapping.
 For each row in tablename, create a conventional EvaluationLink.
 It contains *only* the columns that are not foreign keys:
 ```
-	Evaluation
-		Predicate "tablename"
-		List
-			Concept "column 1" ; If column type is a string
-			Concept "column 2"
-			...
-			NumberNode NNN	; If column type is a number.
+   Evaluation
+      Predicate "tablename"
+      List
+         Concept "column 1" ; If column type is a string
+         Concept "column 2"
+         ...
+         NumberNode NNN   ; If column type is a number.
 ```
 
 For each row in tablename having a column that is a foreign key:
 ```
-	Evaluation
-		Predicate "host tablename . foreign key"
-		List
-			Evaluation ;;; row in the host table
-				Predicate "host tablename"
-				List
-					Concept ...
+   Evaluation
+      Predicate "host tablename . foreign key"
+      List
+         Evaluation ;;; row in the host table
+            Predicate "host tablename"
+            List
+               Concept ...
 
-			Evaluation	;; row in the target table.
-				Predicate "target tablename"
-				List
-					Concept ...
+         Evaluation   ;; row in the target table.
+            Predicate "target tablename"
+            List
+               Concept ...
 ```
 See the OpenCog wiki:
 * [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink]
@@ -79,15 +79,15 @@ the AtomSpace. Below is a proposed mapping.
 
 ```
  DefineLink
-     DefinedSchema "tablename"
-     SignatureLink
-        Evaluation
-            Predicate "tablename"
-            List
-                TypeNode 'ConceptNode  ;; For SQL text/varchar
-                TypeNode 'ConceptNode
-                ...
-                TypeNode 'NumberNode   ;; For SQL numbers
+    DefinedSchema "tablename"
+    SignatureLink
+       Evaluation
+          Predicate "tablename"
+          List
+             TypeNode 'ConceptNode  ;; For SQL text/varchar
+             TypeNode 'ConceptNode
+             ...
+             TypeNode 'NumberNode   ;; For SQL numbers
 ```
 
 See the OpenCog wiki:
@@ -103,7 +103,7 @@ Examples of accessing data in a foreign database.
 ```
 ; Describe where it is located.
 (define foreign-db
-	(ForeignStoreageNode "postgres://example.com/foo?user=foo&passwd=bar"))
+   (ForeignStoreageNode "postgres://example.com/foo?user=foo&passwd=bar"))
 
 ; Open it.
 (cog-open foreign-db)
