@@ -2,6 +2,7 @@
 # ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
 ADD_LIBRARY (persist-fdi
+	ForeignPersistSCM.cc
 	ForeignStorage.cc
 	ll-pg-cxx.cc
 	llapi.cc
