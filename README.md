@@ -18,10 +18,11 @@ The following are desired features:
 * Both the reading and the update of the SQL tables is possible.
 
 This could be called a "Foreign Data Interface" (FDI) to the AtomSpace.
+At this time, it supports Postgres only.
 
 Status
 ------
-***Version 0.0.2*** -- Mostly a collection of design notes. Initial
+***Version 0.0.3*** -- Mostly a collection of design notes. Initial
 boilerplate to connect to Postgres.
 
 History
@@ -41,8 +42,6 @@ SQL database.
 
 For each row in some table `tablename`, create a conventional
 Atomese [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink).
-It contains *only* the columns that are not foreign keys. The foreign
-keys are treated seperately, below.
 ```
    Evaluation
       Predicate "tablename"
@@ -53,26 +52,44 @@ keys are treated seperately, below.
          NumberNode NNN   ; If column type is a number.
 ```
 
-For each row in `tablename` having a column that is a foreign key,
-create a pair that links the two rows together.
+Primary and Foreign Keys
+------------------------
+The primary mapping problem is what to do with primary and foreign keys.
+The simplest solution is to "do nothing" and let the user just wing it.
+That is, to join tables together, the user would write Atomese queries
+using the [IdenticalLink](https://wiki.opencog.org/w/IdenticalLink)
+to trace between two different predicates (aka tables). This works and
+is surprisingly flexible.
+
+Other mappings are possible; however, there is no natural way of asking
+Postgres which table columns are foreign keys, and which other tables
+they might reference. If this info was possible, then we could have a
+an Atomese representation that does NOT keep any keys at all in the
+AtomSpace, and instead just makes direct links between table rows.
+So, for example:
+
 ```
    Evaluation
-      Predicate "host tablename . foreign key"
-      List
+      Predicate "key join relation"
+      Set
          Evaluation ;;; row in the host table
-            Predicate "host tablename"
-            List
-               Concept ...
+            Predicate "some tablename"
+            List ...
 
          Evaluation   ;; row in the target table.
-            Predicate "target tablename"
-            List
-               Concept ...
+            Predicate "another tablename"
+            List ...
+
+         Evaluation   ;; if more than two tables are joined.
+            Predicate "yet another tablename"
+            List ...
 ```
 See the OpenCog wiki:
 * [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink)
 * [PredicateNode](https://wiki.opencog.org/w/PredicateNode)
 
+For just right now, we punt, and store indexes in the AtomSpace.
+Its simple and easy. It wastes some RAM, but so what.
 
 Table Schemas
 -------------
@@ -123,6 +140,10 @@ Specific databases might benefit from custom types:
 
 Using
 -----
+Below is a sketch of how things could work. For actual examples that
+actually run and actually do things, see the
+[examples directory](./examples).
+
 Examples of accessing data in a foreign database.
 
 ```
