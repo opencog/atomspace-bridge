@@ -184,4 +184,11 @@ which could be marginally more efficient, presuming that the
              ...
 ```
 
+Open Questions
+--------------
+Some issues to ponder:
+* The flybase dataset seems to have a large number of extremely complex
+  SQL stored procedures. What are they? What do they do? What should we
+  do with them?
+
 -----------------------------------------------------------------------
