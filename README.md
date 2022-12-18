@@ -21,8 +21,8 @@ This could be called a "Foreign Data Interface" (FDI) to the AtomSpace.
 
 Status
 ------
-***Version 0.0.1*** -- Mostly a collection of design notes. Initial
-boilerplate to connect to Postgres,
+***Version 0.0.2*** -- Mostly a collection of design notes. Initial
+boilerplate to connect to Postgres.
 
 History
 -------
@@ -182,6 +182,38 @@ which could be marginally more efficient, presuming that the
                  Variable "gene_is_regulatory_region"
                  Type 'NumberNode
              ...
+```
+
+Building and Installing
+-----------------------
+As of now, this module can be built. It compiles and sort-of-ish does
+stuff.  The build process is identical to that of other modules in
+OpenCog.
+
+### Prerequisites
+
+###### AtomSpace
+* The AtomSpace, of course.
+* https://github.com/opencog/atomspace
+* It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
+
+###### Postgres
+* SQL Database
+* https://postgres.org | `apt install postgresql postgresql-client libpq-dev`
+
+### Building this module
+
+Be sure to install the pre-requisites first!
+Perform the following steps at the shell prompt:
+```
+    cd to project root dir
+    mkdir build
+    cd build
+    cmake ..
+    make -j4
+    sudo make install
+    make -j4 check
 ```
 
 Open Questions
