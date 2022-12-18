@@ -138,9 +138,15 @@ class ForeignStorage::Response
 		Handle tcol;
 		bool tabledesc_cb(void)
 		{
+			tcol = nullptr;
 			rs->foreach_column(&Response::table_column_cb, this);
-			Handle tyv = as->add_link(TYPED_VARIABLE_LINK, vcol, tcol);
-			tentries->emplace_back(tyv);
+
+			// Add the var only if we know how to deal with the type
+			if (tcol)
+			{
+				Handle tyv = as->add_link(TYPED_VARIABLE_LINK, vcol, tcol);
+				tentries->emplace_back(tyv);
+			}
 			return false;
 		}
 		bool table_column_cb(const char *colname, const char * colvalue)
@@ -158,9 +164,37 @@ class ForeignStorage::Response
 				}
 				else
 				if (!strcmp(colvalue, "int4") or
-				    !strcmp(colvalue, "int8"))
+				    !strcmp(colvalue, "int2") or
+				    !strcmp(colvalue, "int8") or
+				    !strcmp(colvalue, "float4") or
+				    !strcmp(colvalue, "float8") or
+				    !strcmp(colvalue, "bool"))
 				{
 					tcol = as->add_node(TYPE_NODE, "NumberNode");
+				}
+				else
+				if (!strcmp(colvalue, "timestamp") or
+				    !strcmp(colvalue, "date"))
+				{
+					// ignore, for now
+					tcol = nullptr;
+
+				}
+				else
+				if (!strcmp(colvalue, "bpchar"))
+				{
+					// In 'audit_chado' this is used as a binary true-false
+					// In 'feature' this is used for a hex md5sum
+					// ignore, for now
+					tcol = nullptr;
+
+				}
+				else
+				if (!strcmp(colvalue, "jsonb"))
+				{
+					// In 'allele_disease_variant'
+					// ignore, for now
+					tcol = nullptr;
 				}
 				else
 					printf("duuuude unknow coltype >>%s<<\n", colvalue);
