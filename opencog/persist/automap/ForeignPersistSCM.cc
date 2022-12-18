@@ -71,7 +71,7 @@ ForeignPersistSCM::~ForeignPersistSCM()
 {
 }
 
-void opencog_persist_rocks_init(void)
+void opencog_persist_fdi_init(void)
 {
 	static ForeignPersistSCM patty(nullptr);
 }

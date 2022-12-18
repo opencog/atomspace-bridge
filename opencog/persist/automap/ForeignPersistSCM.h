@@ -51,7 +51,7 @@ public:
 }  // namespace
 
 extern "C" {
-void opencog_persist_foreign_init(void);
+void opencog_persist_fdi_init(void);
 };
 
 #endif // _OPENCOG_FOREIGN_PERSIST_SCM_H

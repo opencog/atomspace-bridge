@@ -16,13 +16,8 @@ TARGET_LINK_LIBRARIES(persist-fdi
 	atomspace
 )
 
-# ADD_GUILE_EXTENSION(SCM_CONFIG persist-fdi "opencog-ext-path-persist-fdi")
-
-#ADD_GUILE_MODULE (FILES
-#	opencog/persist-fdi.scm
-#	DEPENDS persist-fdi
-##	COMPILE
-#)
+# The `persist-fdi` below is the name of the shared lib, not the module.
+ADD_GUILE_EXTENSION(SCM_CONFIG persist-fdi "opencog-ext-path-persist-fdi")
 
 INSTALL (TARGETS persist-fdi EXPORT AtomSpaceAutoMapTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
