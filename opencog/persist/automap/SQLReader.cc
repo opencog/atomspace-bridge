@@ -55,8 +55,6 @@ void ForeignStorage::get_server_version(void)
 
 Handle ForeignStorage::load_one_table(const std::string& tablename)
 {
-printf("duuude found table ==>%s<==\n", tablename.c_str());
-
 	// Simple query. Placeholder, see notes for what we really need.
 	// udt_name is better than data_type
 	// If same table in two schemas, then add `AND table_schema = 'foo'`
@@ -88,7 +86,7 @@ printf("duuude found table ==>%s<==\n", tablename.c_str());
 	Handle tabn = _atom_space->add_node(PREDICATE_NODE, std::string(tablename));
 	Handle tabe = _atom_space->add_link(EVALUATION_LINK, tabn, tabc);
 	Handle tabs = _atom_space->add_link(SIGNATURE_LINK, tabe);
-printf("============= Table %s\n%s\n", tablename.c_str(),
+printf("============= Table ==>%s<==\n%s\n", tablename.c_str(),
 tabs->to_short_string().c_str());
 	return tabs;
 }

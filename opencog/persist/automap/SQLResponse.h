@@ -154,14 +154,16 @@ class ForeignStorage::Response
 				if (!strcmp(colvalue, "text") or
 				    !strcmp(colvalue, "varchar"))
 				{
-					tcol = as->add_node(TYPE_NODE, "'ConceptNode");
-				}
-				else if (!strcmp(colvalue, "int4"))
-				{
-					tcol = as->add_node(TYPE_NODE, "'NumberNode");
+					tcol = as->add_node(TYPE_NODE, "ConceptNode");
 				}
 				else
-					printf("duuuude unknow coltype %s\n", colvalue);
+				if (!strcmp(colvalue, "int4") or
+				    !strcmp(colvalue, "int8"))
+				{
+					tcol = as->add_node(TYPE_NODE, "NumberNode");
+				}
+				else
+					printf("duuuude unknow coltype >>%s<<\n", colvalue);
 			}
 			return false;
 		}
