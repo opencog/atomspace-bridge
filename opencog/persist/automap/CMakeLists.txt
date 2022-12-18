@@ -6,7 +6,7 @@ ADD_LIBRARY (persist-fdi
 	llapi.cc
 )
 
-ADD_DEPENDENCIES(persist-fdi opencog_atom_types atomspace)
+# ADD_DEPENDENCIES(persist-fdi opencog_atom_types atomspace)
 
 TARGET_LINK_LIBRARIES(persist-fdi
 	persist
@@ -22,6 +22,6 @@ TARGET_LINK_LIBRARIES(persist-fdi
 ##	COMPILE
 #)
 
-INSTALL (TARGETS persist-fdi EXPORT AutoMapTargets
+INSTALL (TARGETS persist-fdi EXPORT AtomSpaceAutoMapTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
