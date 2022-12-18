@@ -115,6 +115,22 @@ class ForeignStorage::Response
 			intval = strtoul(colvalue, NULL, 10);
 			return false;
 		}
+
+		// Strings --------------------------------------------
+		std::vector<std::string>* strvec;
+		bool strvec_cb(void)
+		{
+			rs->foreach_column(&Response::strval_column_cb, this);
+			return false;
+		}
+
+		bool strval_column_cb(const char *colname, const char * colvalue)
+		{
+			// we're not going to bother to check the column name ...
+			strvec->emplace_back(colvalue);
+			return false;
+		}
+
 };
 
 /* ============================= END OF FILE ================= */
