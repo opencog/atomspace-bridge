@@ -17,14 +17,24 @@
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-foreign))
 
-; Declare the location of the database
-(define flystore (ForeignStorageNode "postgres://flybase"))
+; Declare the location of the database.
+; Note three slashes; for a remote DB, use the URL
+; postgres://example.com/flybase
+; postgres://example.com/flybase?user=foo
+; postgres://example.com/flybase?user=foo&password=bar
+;
+; The following works if you set up the AtomSpace Unit tests correctly:
+; postgres:///opencog_test?user=opencog_tester&password=cheese
+;
+(define flystore (ForeignStorageNode "postgres:///flybase"))
 
 ; Open it.
 (cog-open flystore)
 
+(cog-connected? flystore)
+
 ; What's up, Doc?
-(monitor-storage flystore)
+(display (monitor-storage flystore))
 
 ; Start bulldozing around.
 (cog-foreign-load-schemas flystore)

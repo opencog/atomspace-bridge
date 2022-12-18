@@ -48,7 +48,6 @@ namespace opencog
 class ForeignStorage : public StorageNode
 {
 	private:
-		void init(const char *);
 		std::string _uri;
 
 		// Pool of shared connections

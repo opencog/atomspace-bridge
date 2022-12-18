@@ -44,26 +44,19 @@ using namespace opencog;
 /* ================================================================ */
 // Constructors
 
-void ForeignStorage::init(const char * uri)
-{
-#define URIX_LEN (sizeof("postgres://") - 1)  // Should be 11
-	// We expect the URI to be for the form
-	//    postgres://example.com/dbase?user=foo&passwd=bar
-	std::string file(uri + URIX_LEN);
-
-}
-
 ForeignStorage::ForeignStorage(std::string uri) :
 	StorageNode(FOREIGN_STORAGE_NODE, std::move(uri))
 {
 	const char *yuri = _name.c_str();
 
+#define URIX_LEN (sizeof("postgres://") - 1)  // Should be 11
+	// We expect the URI to be for the form
+	//    postgres://example.com/dbase?user=foo&passwd=bar
 	if (strncmp(yuri, "postgres://", URIX_LEN))
 		throw IOException(TRACE_INFO,
 			"Unknown URI '%s'\nValid URI's start with 'postgres://'\n", yuri);
 
-	// _uri = "rocks://" + file;
-	_name = _uri;
+	// _name = _uri;
 	_initial_conn_pool_size = 0;
 	_is_open = false;
 }
@@ -97,7 +90,9 @@ void ForeignStorage::open(void)
 	if (0 == _initial_conn_pool_size)
 		enlarge_conn_pool(POOL_SIZE, _name.c_str());
 
-	if (!connected()) return;
+	if (!connected())
+		throw IOException(TRACE_INFO,
+			"Failed to connect to %s\n", _name.c_str());
 
 	_is_open = true;
 
@@ -157,6 +152,12 @@ void ForeignStorage::clear_stats(void)
 std::string ForeignStorage::monitor(void)
 {
 	std::string rs;
+	if (not _is_open)
+	{
+		rs += "No connection to DB `" + _name + "`\n";
+		return rs;
+	}
+
 	rs += "Connected to `" + _name + "`\n";
 	return rs;
 }
