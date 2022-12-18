@@ -25,19 +25,19 @@ PROJECT(atomspace-automap)
 # ----------------------------------------------------------
 # User-modifiable options. Feel free to change these!
 #
-# uncomment to be in Release mode [default]
+# Uncomment to be in Release mode [default].
 # SET(CMAKE_BUILD_TYPE Release)
 
-# uncomment to build in debug mode
+# Uncomment to build in debug mode.
 # SET(CMAKE_BUILD_TYPE Debug)
 
-# uncomment to be in coverage testing mode
+# Uncomment to be in coverage testing mode.
 # SET(CMAKE_BUILD_TYPE Coverage)
 
-# uncomment to build in profile mode
+# Uncomment to build in profile mode.
 # SET(CMAKE_BUILD_TYPE Profile)
 
-# uncomment to build in release mode with debug information
+# Uncomment to build in release mode with debug information.
 # SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # default build type
@@ -61,20 +61,20 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 # Cogutil
 FIND_PACKAGE(CogUtil 2.0.1 CONFIG REQUIRED)
 IF (COGUTIL_FOUND)
-    MESSAGE(STATUS "CogUtil found.")
-    ADD_DEFINITIONS(-DHAVE_COGUTIL)
-    SET(HAVE_COGUTIL 1)
+	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
+	ADD_DEFINITIONS(-DHAVE_COGUTIL)
+	SET(HAVE_COGUTIL 1)
 ELSE (COGUTIL_FOUND)
-    MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
+	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
 ENDIF (COGUTIL_FOUND)
 
 # add the 'cmake' directory from cogutil to search path
 list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
 
-include(${COGUTIL_DATA_DIR}/cmake/OpenCogGccOptions.cmake)
-include(${COGUTIL_DATA_DIR}/cmake/OpenCogLibOptions.cmake)
-include(${COGUTIL_DATA_DIR}/cmake/OpenCogInstallOptions.cmake)
-include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
+include(OpenCogGccOptions)
+include(OpenCogLibOptions)
+include(OpenCogInstallOptions)
+include(Summary)
 
 # ===================================================================
 # Check for existance of various required, optional packages.
@@ -90,13 +90,13 @@ ELSE (ATOMSPACE_FOUND)
 ENDIF (ATOMSPACE_FOUND)
 
 # Postgres
-FIND_PACKAGE(PGSQL 12 CONFIG REQUIRED)
+FIND_PACKAGE(PGSQL 12) # CONFIG REQUIRED)
 IF (PGSQL_FOUND)
-   ADD_DEFINITIONS(-DHAVE_PGSQL)
-   SET(HAVE_PGSQL 1)
-   SET(PGSQL_DIR_MESSAGE "PostgresSQL ${PGSQL_VERSION_STRING} was found.")
+	ADD_DEFINITIONS(-DHAVE_PGSQL)
+	SET(HAVE_PGSQL 1)
+	SET(PGSQL_DIR_MESSAGE "PostgresSQL ${PGSQL_VERSION_STRING} was found.")
 ELSE (PGSQL_FOUND)
-   SET(PGSQL_DIR_MESSAGE "PostgresSQL was not found; required.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
+	SET(PGSQL_DIR_MESSAGE "PostgresSQL was not found; required.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
 ENDIF (PGSQL_FOUND)
 MESSAGE(STATUS "${PGSQL_DIR_MESSAGE}")
 
@@ -141,9 +141,9 @@ IF (NOT DEFINED ATOMSPACE_DATA_DIR)
 	SET (ATOMSPACE_DATA_DIR "${COGUTIL_DATA_DIR}")
 ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
 
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
-# INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogCython.cmake")
+INCLUDE(OpenCogMacros)
+INCLUDE(OpenCogGuile)
+# INCLUDE(OpenCogCython)
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -156,7 +156,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# doing coverage stuff while running tests if this is the Coverage build
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(check
 			# TODO lcov should be found by cmake first
 			# TODO set it up so that we can pick to run coverage per test, or
 			# combined across all tests (the latter is MUCH faster). Use a define?
@@ -171,14 +171,18 @@ IF (CXXTEST_FOUND)
 			COMMENT "Running tests with coverage..."
 		)
 	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# If this is a build with coverage enabled then test normally
-		ADD_CUSTOM_TARGET(test
+		# Coverage is disabled; test normally
+		ADD_CUSTOM_TARGET(check
 			DEPENDS tests
 			WORKING_DIRECTORY tests
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
 			COMMENT "Running tests..."
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+
+	# When CMP00037 is finally turned off, just remove these two lines.
+	ADD_CUSTOM_TARGET(test)
+	ADD_DEPENDENCIES(test check)
 
 ENDIF (CXXTEST_FOUND)
 
@@ -206,7 +210,7 @@ FILE(WRITE "${PROJECT_BINARY_DIR}/install_manifest.txt")
 ## It doesn't have a header-file declaring the version similar to cogutil and
 ## atomspace.
 # SEMANTIC_VERSION is set in `lib/AtomSpaceAutomMapConfig.cmake.in`
-# SET(SEMANTIC_VERSION 1.3.0)
+# SET(SEMANTIC_VERSION 0.0.1)
 
 ## Cpack configuration
 SET(CPACK_GENERATOR "DEB")
@@ -237,7 +241,7 @@ SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://opencog.org")
 INCLUDE(CPack)
 
 # ===================================================================
-# documentation
+# Documentation.
 FIND_PACKAGE(Doxygen)
 # ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
