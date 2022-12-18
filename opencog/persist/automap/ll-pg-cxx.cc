@@ -29,9 +29,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_PGSQL
-
-#include <libpq-fe.h>
+#include <postgresql/libpq-fe.h>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -233,5 +231,4 @@ LLPGRecordSet::fetch_row(void)
 	return true;
 }
 
-#endif /* HAVE_PGSQL */
 /* ============================= END OF FILE ================= */

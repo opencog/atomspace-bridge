@@ -113,11 +113,6 @@ void ForeignStorage::close(void)
 	_is_open = false;
 }
 
-std::string ForeignStorage::get_version(void)
-{
-	return "none";
-}
-
 bool ForeignStorage::connected(void)
 {
 	if (0 == _is_open) return false;
