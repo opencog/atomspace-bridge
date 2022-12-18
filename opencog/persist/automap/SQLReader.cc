@@ -56,31 +56,50 @@ void ForeignStorage::get_server_version(void)
 Handle ForeignStorage::load_one_table(const std::string& tablename)
 {
 printf("duuude found table ==>%s<==\n", tablename.c_str());
-#if 0
-	Response rp(conn_pool);
 
+	// Simple query. Placeholder, see notes for what we really need.
 	// udt_name is better than data_type
 	// If same table in two schemas, then add `AND table_schema = 'foo'`
 	// This will get bad results for user-defined types...
 	std::string buff =
-		"SELECT column_name, udt_name FROM information_schema.columns "
-		"WHERE table_name =  '" + tablename + "';";
+		"SELECT column_name AS c, udt_name AS t "
+		"FROM information_schema.columns "
+		"WHERE table_name = '" + tablename + "';";
+
+	Response rp(conn_pool);
 	rp.exec(buff);
 
-	rp.rs->foreach_row(&Response::strvecvec_cb, &rp);
-#endif
-	Handle tabh = _atom_space->add_node(PREDICATE_NODE, std::string(tablename));
-	return tabh;
+	HandleSeq tcols;
+	rp.as = _atom_space;
+	rp.tentries = &tcols;
+	rp.rs->foreach_row(&Response::tabledesc_cb, &rp);
+
+	// Create a signature of the general form:
+	//
+	//    Signature
+	//       Evaluation
+	//          Predicate "gene.allele"
+	//          List
+	//             TypedVariable
+	//                 Variable "symbol"
+	//                 Type 'GeneNode
+
+	Handle tabc = _atom_space->add_link(LIST_LINK, std::move(tcols));
+	Handle tabn = _atom_space->add_node(PREDICATE_NODE, std::string(tablename));
+	Handle tabe = _atom_space->add_link(EVALUATION_LINK, tabn, tabc);
+	Handle tabs = _atom_space->add_link(SIGNATURE_LINK, tabe);
+printf("============= Table %s\n%s\n", tablename.c_str(),
+tabs->to_short_string().c_str());
+	return tabs;
 }
 
 void ForeignStorage::load_tables(void)
 {
-	std::vector<std::string> tabnames;
-
 	Response rp(conn_pool);
-	rp.strvec = &tabnames;
-
 	rp.exec("SELECT tablename FROM pg_tables WHERE schemaname != 'pg_catalog';");
+
+	std::vector<std::string> tabnames;
+	rp.strvec = &tabnames;
 	rp.rs->foreach_row(&Response::strvec_cb, &rp);
 
 printf("duude found %lu tables\n", tabnames.size());

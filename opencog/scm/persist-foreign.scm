@@ -14,6 +14,9 @@
 (set-procedure-property! cog-foreign-load-tables 'documentation
 "
   cog-foreign-load-tables STORAGE - Load table definitions
+
+  Optionally specify the schema from which to load the tables
+  (not implemeneted)
 ")
 
 ;;;(set-procedure-property! sql-open 'documentation

@@ -131,6 +131,42 @@ class ForeignStorage::Response
 			return false;
 		}
 
+		// Table descriptions --------------------------------------------
+		AtomSpace* as;
+		HandleSeq* tentries;
+		Handle vcol;
+		Handle tcol;
+		bool tabledesc_cb(void)
+		{
+			rs->foreach_column(&Response::table_column_cb, this);
+			Handle tyv = as->add_link(TYPED_VARIABLE_LINK, vcol, tcol);
+			tentries->emplace_back(tyv);
+			return false;
+		}
+		bool table_column_cb(const char *colname, const char * colvalue)
+		{
+			if ('c' == colname[0])
+			{
+				vcol = as->add_node(VARIABLE_NODE, std::string(colvalue));
+			}
+			else if ('t' == colname[0])
+			{
+				if (!strcmp(colvalue, "text") or
+				    !strcmp(colvalue, "varchar"))
+				{
+					tcol = as->add_node(TYPE_NODE, "'ConceptNode");
+				}
+				else if (!strcmp(colvalue, "int4"))
+				{
+					tcol = as->add_node(TYPE_NODE, "'NumberNode");
+				}
+				else
+					printf("duuuude unknow coltype %s\n", colvalue);
+			}
+			return false;
+		}
+
+
 };
 
 /* ============================= END OF FILE ================= */

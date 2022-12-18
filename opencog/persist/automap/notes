@@ -1,0 +1,59 @@
+Notes:
+
+SELECT column_name, udt_name FROM information_schema.columns
+WHERE table_name =  'foo' AND schemaname = 'gene';
+
+other schemsa are gene_group humanhealth public
+
+WHERE schemaname != 'pg_catalog'
+
+pg_catalog
+
+pg_get_catalog_foreign_keys () → setof record ( fktable regclass, fkcols text[], pktable regclass, pkcols text[], is_array boolean, is_opt boolean )
+
+pg_index_column_has_property ( index regclass, column integer, property text ) → boolean
+
+format_type ( type oid, typemod integer ) → text
+
+Basic select
+SELECT
+    pg_attribute.attname AS column_name,
+    pg_catalog.format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS data_type
+FROM
+    pg_catalog.pg_attribute
+INNER JOIN
+    pg_catalog.pg_class ON pg_class.oid = pg_attribute.attrelid
+INNER JOIN
+    pg_catalog.pg_namespace ON pg_namespace.oid = pg_class.relnamespace
+WHERE
+    pg_attribute.attnum > 0
+    AND NOT pg_attribute.attisdropped
+    -- AND pg_namespace.nspname = 'my_schema'
+    AND pg_class.relname = 'allele_stock'
+ORDER BY
+    attnum ASC;
+
+So-----
+
+SELECT
+    pg_attribute.attname AS column_name,
+    pg_catalog.format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS data_type,
+    pg_attribute.attnum
+FROM
+    pg_catalog.pg_attribute
+INNER JOIN
+    pg_catalog.pg_class ON pg_class.oid = pg_attribute.attrelid
+INNER JOIN
+    pg_catalog.pg_namespace ON pg_namespace.oid = pg_class.relnamespace
+-- INNER JOIN
+--     pg_catalog.pg_index ON
+--         pg_attribute.attrelid = pg_index.indrelid
+--         AND pg_attribute.attnum = ANY(pg_index.indkey)
+WHERE
+    pg_attribute.attnum > 0
+    AND NOT pg_attribute.attisdropped
+    -- AND pg_namespace.nspname = 'my_schema'
+    AND pg_class.relname = 'allele_stock' ;
+
+
+-------
