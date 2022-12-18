@@ -38,10 +38,13 @@
 ; What's up, Doc?
 (display (monitor-storage flystore))
 
-; Start bulldozing around.
+; Load all of the table defintions.
 (cog-foreign-load-tables flystore)
 
 ; What is in the AtomSpace so far?
 (cog-prt-atomspace)
+
+; Load one table
+(fetch-incoming-set (Predicate "cell_line"))
 
 (cog-close flystore)

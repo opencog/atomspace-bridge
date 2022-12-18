@@ -62,7 +62,8 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	std::string buff =
 		"SELECT column_name AS c, udt_name AS t "
 		"FROM information_schema.columns "
-		"WHERE table_name = '" + tablename + "';";
+		"WHERE table_name = '" + tablename + "' "
+		"ORDER BY c;";
 
 	Response rp(conn_pool);
 	rp.exec(buff);
@@ -86,24 +87,47 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	Handle tabn = _atom_space->add_node(PREDICATE_NODE, std::string(tablename));
 	Handle tabe = _atom_space->add_link(EVALUATION_LINK, tabn, tabc);
 	Handle tabs = _atom_space->add_link(SIGNATURE_LINK, tabe);
-printf("============= Table ==>%s<==\n%s\n", tablename.c_str(),
-tabs->to_short_string().c_str());
+	printf("============= Loaded table ==>%s<==\n", tablename.c_str());
+
 	return tabs;
 }
 
 void ForeignStorage::load_tables(void)
 {
 	Response rp(conn_pool);
-	rp.exec("SELECT tablename FROM pg_tables WHERE schemaname != 'pg_catalog';");
+	// This fetches everything except the postgres tables.
+	// Unfortunately, it fetchs view and other non-table things.
+	// rp.exec("SELECT tablename FROM pg_tables WHERE schemaname != 'pg_catalog';");
+
+	// This seems like the correct hack-of-the-moment.
+	rp.exec("SELECT tablename FROM pg_tables WHERE schemaname = 'public';");
 
 	std::vector<std::string> tabnames;
 	rp.strvec = &tabnames;
 	rp.rs->foreach_row(&Response::strvec_cb, &rp);
 
-printf("duude found %lu tables\n", tabnames.size());
+	_num_tables = tabnames.size();
+printf("duude found %lu tables\n", _num_tables);
 	for (const std::string& tn : tabnames)
 		load_one_table(tn);
 }
+
+/* ================================================================ */
+
+void ForeignStorage::load_table_data(const Handle& hp)
+{
+	std::string buff =
+		"SELECT * FROM " + hp->get_name() +
+		" ORDER BY column_name;";
+
+	Response rp(conn_pool);
+	rp.exec(buff);
+
+	rp.as = _atom_space;
+	rp.pred = hp;
+	rp.rs->foreach_row(&Response::tabledata_cb, &rp);
+}
+
 
 /* ================================================================ */
 
@@ -116,12 +140,24 @@ Handle ForeignStorage::getLink(Type, const HandleSeq&)
 	return Handle::UNDEFINED;
 }
 
-void ForeignStorage::fetchIncomingSet(AtomSpace*, const Handle&)
+void ForeignStorage::fetchIncomingSet(AtomSpace* as, const Handle& h)
 {
+	// Multiple different cases are to be handled:
+	// 1) h is a PredicateNode, and so we assume it is the name of a table.
+	// 2) h is a VariableNode or TypedVariable, so we assume it names
+	//    a solumn in one or more tables.
+	// 3) h is a ConceptNode; we assume it's some in some row of some
+	//    table.
+	// 4) h is a NumberNode; we assume it's a primary/foreign key.
+
+	if (h->is_type(PREDICATE_NODE))
+		load_table_data(h);
 }
 
-void ForeignStorage::fetchIncomingByType(AtomSpace*, const Handle&, Type t)
+void ForeignStorage::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
 {
+	// Ignore the type spec.
+	fetchIncomingSet(as, h);
 }
 
 void ForeignStorage::storeAtom(const Handle&, bool synchronous)

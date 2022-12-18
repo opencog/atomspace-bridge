@@ -95,6 +95,9 @@ void ForeignStorage::open(void)
 		throw IOException(TRACE_INFO,
 			"Failed to connect to %s\n", _name.c_str());
 
+	// Initialize stuff
+	_num_tables = 0;
+
 	// We don't really need to do this...
 	get_server_version();
 printf("Connected to Postgres server version %d\n", _server_version);
@@ -160,6 +163,7 @@ std::string ForeignStorage::monitor(void)
 	}
 
 	rs += "Connected to `" + _name + "`\n";
+	rs += "Number of loaded tables: " + std::to_string(_num_tables);
 	return rs;
 }
 

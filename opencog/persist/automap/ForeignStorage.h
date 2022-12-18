@@ -63,8 +63,10 @@ class ForeignStorage : public StorageNode
 		int _server_version;
 		void get_server_version(void);
 
-		// Loading of schemas
+		// Loading of table defintions
 		Handle load_one_table(const std::string&);
+		size_t _num_tables;
+		void load_table_data(const Handle&);
 
 	public:
 		ForeignStorage(std::string uri);
