@@ -1,6 +1,6 @@
 /*
  * FILE:
- * opencog/persist/automap/ForeignPG.cc
+ * opencog/persist/automap/SQLReader.cc
  *
  * FUNCTION:
  * Foreign SQL to AtomSpace interaces.
@@ -35,6 +35,9 @@
 
 #include "ForeignStorage.h"
 
+#include "SQLResponse.h"
+#include "ll-pg-cxx.h"
+
 using namespace opencog;
 
 /* ================================================================ */
@@ -67,7 +70,7 @@ void ForeignStorage::fetchIncomingByType(AtomSpace*, const Handle&, Type t)
 {
 }
 
-void ForeignStorage::storeAtom(const Handle&, bool synchronous = false)
+void ForeignStorage::storeAtom(const Handle&, bool synchronous)
 {
 }
 

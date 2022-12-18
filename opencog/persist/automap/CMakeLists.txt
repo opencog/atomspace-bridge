@@ -2,7 +2,7 @@
 ADD_LIBRARY (persist-fdi SHARED
 	ForeignPersistSCM.cc
 	ForeignStorage.cc
-	ForeignPG.cc
+	SQLReader.cc
 	ll-pg-cxx.cc
 	llapi.cc
 )
