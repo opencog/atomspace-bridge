@@ -1,7 +1,5 @@
-# Uncomment this if SQL is installed.
-# ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
-ADD_LIBRARY (persist-fdi
+ADD_LIBRARY (persist-fdi SHARED
 	ForeignPersistSCM.cc
 	ForeignStorage.cc
 	ll-pg-cxx.cc
