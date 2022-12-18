@@ -1,14 +1,37 @@
-
 Automapping of SQL DB's
 =======================
 
-Per request of Mike Duncan. Map the DB
+Design goals: Automatically map pre-existing SQL DB's to/from the
+AtomSpace. This is *not* intended for generic save/restore of the
+AtomSpace itself. For that, see the native
+[atomspace-rocks](https://github.com/opencog/atomspace-rocks) RocksDB
+[StorageNode](https://wiki.opencog.org/w/StorageNode) and the
+[atomspace-cog](https://github.com/opencog/atomspace-cog) network
+StorageNode.
 
-https://ftp.flybase.net/releases/FB2022_06/psql/FB2022_06.sql.gz
+The following are desired features:
+* Mapping from the SQL tables to AtomSpace structures is mostly
+  automated, by importing pre-existing SQL table schemas.
+* Customization of the mapping is possible, so as to allow more
+  "natural" [Atomese](https://wiki.opencog.org/w/Atomese)
+  representations.
+* Both the reading and the update of the SQL tables is possible.
 
-into the AtomSpace, using the schema given at
+Status
+------
+***Version 0.0.0 ***
+At this time, this is just a collection of design notes; nothing has
+been implemented.
 
-http://gmod.org/wiki/Chado
+History
+-------
+Per request of Mike Duncan. Map the
+[FlyBase Drosophila Genome Database](http://flybase.org)
+(current release
+[here](https://ftp.flybase.net/releases/FB2022_06/psql/FB2022_06.sql.gz)
+into the AtomSpace, using the
+[Chado](http://gmod.org/wiki/Chado)
+schema given [here](http://gmod.org/wiki/Chado_Tables).
 
 Attempt #1
 ----------
