@@ -67,7 +67,7 @@ For each row in tablename having a column that is a foreign key:
                Concept ...
 ```
 See the OpenCog wiki:
-* [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink]
+* [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink)
 * [PredicateNode](https://wiki.opencog.org/w/PredicateNode)
 
 
@@ -91,10 +91,32 @@ the AtomSpace. Below is a proposed mapping.
 ```
 
 See the OpenCog wiki:
-* [DefineLink](https://wiki.opencog.org/w/DefineLink]
-* [DefinedSchemaNode](https://wiki.opencog.org/w/DefinedSchemaNode]
-* [SignatureLink](https://wiki.opencog.org/w/SignatureLink]
-* [TypeNode](https://wiki.opencog.org/w/TypeNode]
+* [DefineLink](https://wiki.opencog.org/w/DefineLink)
+* [DefinedSchemaNode](https://wiki.opencog.org/w/DefinedSchemaNode)
+* [SignatureLink](https://wiki.opencog.org/w/SignatureLink)
+* [TypeNode](https://wiki.opencog.org/w/TypeNode)
+
+Perhaps the above is not so wise; SQL tables do have column
+names, and perhaps we want to capture those names. For this,
+use a labelled type signature aka a "variable node".
+```
+ DefineLink
+    DefinedSchema "tablename"
+    SignatureLink
+       Evaluation
+          Predicate "tablename"
+          List
+             TypedVariable
+                 Variable "name of column 1"
+                 TypeNode 'ConceptNode  ;; For SQL text/varchar
+             TypedVariable
+                 Variable "name of column 2"
+                 TypeNode 'NumberNode  ;; For SQL numbers
+             ...
+```
+See the OpenCog wiki:
+* [VariableNode](https://wiki.opencog.org/w/VariableNode)
+* [TypedVariable](https://wiki.opencog.org/w/TypedVariable)
 
 Using
 -----
@@ -115,8 +137,48 @@ Examples of accessing data in a foreign database.
 
 ; Instead of loading entire tables, perhaps we only want all rows of
 ; all tables that mention gene CG7069.
-; (Concept "CG7069")
+(fetch-incoming-by-type (Concept "CG7069") 'List)
 
+; StorageNodes do have the ability to run generic queries, and we could,
+; in principle, translate at least some of the simpler Atomese queries
+; into SQL, and run those.
+(fetch-query (Meet (Evaluation (Predicate "gene.allele")
+    (List (Concept "CG7069") (Glob "rest of the row")))))
+
+; The fetch-query function is already built into the base, core
+; AtomSpace. We could, of course, create custom functions:
+(automap-get-row "gene.allele" (Concept "CG7069"))
+```
+
+It could be conventient to introduce special-purpose
+[Atom types](https://wiki.opencog.org/w/Atom_types), such as
+`GeneNode` from the agi-bio project. This would allow queries such
+as
+```
+(fetch-incoming-by-type (Gene "CG7069") 'List)
+```
+which could be marginally more efficient, presuming that the
+`gene.allele` table schema was properly declared:
+```
+ DefineLink
+    DefinedSchema "gene.allele"
+    Signature
+       Evaluation
+          Predicate "gene.allele"
+          List
+             TypedVariable
+                 Variable "symbol"
+                 Type 'GeneNode
+             TypedVariable
+                 Variable "is_alleleof"
+                 Type 'NumberNode
+             TypedVariable
+                 Variable "propagate_transgenic_uses"
+                 Type 'NumberNode
+             TypedVariable
+                 Variable "gene_is_regulatory_region"
+                 Type 'NumberNode
+             ...
 ```
 
 -----------------------------------------------------------------------
