@@ -21,13 +21,12 @@ This could be called a "Foreign Data Interface" (FDI) to the AtomSpace.
 
 Status
 ------
-***Version 0.0.0***
-At this time, this is just a collection of design notes; nothing has
-been implemented.
+***Version 0.0.0*** -- At this time, this is just a collection of
+design notes; nothing has been implemented.
 
 History
 -------
-Per request of Mike Duncan. Map the
+Per request of Mike Duncan, Dec 2022. Map the
 [FlyBase Drosophila Genome Database](http://flybase.org)
 (current release
 [here](https://ftp.flybase.net/releases/FB2022_06/psql/FB2022_06.sql.gz)
@@ -37,10 +36,13 @@ schema given [here](http://gmod.org/wiki/Chado_Tables).
 
 Generic Mapping
 ---------------
-Here's a sketch for a generic mapping.
+Here's a sketch for a generic mapping. This could work for *any*
+SQL database.
 
-For each row in tablename, create a conventional EvaluationLink.
-It contains *only* the columns that are not foreign keys:
+For each row in some table `tablename`, create a conventional
+Atomese [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink).
+It contains *only* the columns that are not foreign keys. The foreign
+keys are treated seperately, below.
 ```
    Evaluation
       Predicate "tablename"
@@ -51,7 +53,8 @@ It contains *only* the columns that are not foreign keys:
          NumberNode NNN   ; If column type is a number.
 ```
 
-For each row in tablename having a column that is a foreign key:
+For each row in `tablename` having a column that is a foreign key,
+create a pair that links the two rows together.
 ```
    Evaluation
       Predicate "host tablename . foreign key"
@@ -77,46 +80,46 @@ SQL table definitions are schemas that provide a definition of the
 columns of that table.  It is presumably useful to import these into
 the AtomSpace. Below is a proposed mapping.
 
+The SQL column names are recorded as
+[VariableNode](https://wiki.opencog.org/w/VariableNode) names.
+The type of each variable *aka* column is given.
 ```
  DefineLink
     DefinedSchema "tablename"
-    SignatureLink
+    Signature
        Evaluation
           Predicate "tablename"
           List
-             TypeNode 'ConceptNode  ;; For SQL text/varchar
-             TypeNode 'ConceptNode
+             TypedVariable
+                 Variable "name of column 1"
+                 Type 'ConceptNode  ;; For SQL text/varchar
+             TypedVariable
+                 Variable "name of column 2"
+                 Type 'NumberNode  ;; For SQL numbers
              ...
-             TypeNode 'NumberNode   ;; For SQL numbers
 ```
 
 See the OpenCog wiki:
 * [DefineLink](https://wiki.opencog.org/w/DefineLink)
 * [DefinedSchemaNode](https://wiki.opencog.org/w/DefinedSchemaNode)
 * [SignatureLink](https://wiki.opencog.org/w/SignatureLink)
-* [TypeNode](https://wiki.opencog.org/w/TypeNode)
-
-Perhaps the above is not so wise; SQL tables do have column
-names, and perhaps we want to capture those names. For this,
-use a labelled type signature aka a "variable node".
-```
- DefineLink
-    DefinedSchema "tablename"
-    SignatureLink
-       Evaluation
-          Predicate "tablename"
-          List
-             TypedVariable
-                 Variable "name of column 1"
-                 TypeNode 'ConceptNode  ;; For SQL text/varchar
-             TypedVariable
-                 Variable "name of column 2"
-                 TypeNode 'NumberNode  ;; For SQL numbers
-             ...
-```
-See the OpenCog wiki:
 * [VariableNode](https://wiki.opencog.org/w/VariableNode)
 * [TypedVariable](https://wiki.opencog.org/w/TypedVariable)
+* [TypeNode](https://wiki.opencog.org/w/TypeNode)
+
+The base AtomSpace supports only a few primitive types that
+correspond to conventional SQL DB types. Perhaps this could be
+enriched, e.g. by creating:
+* `StringNode` for SQL `TEXT` and `VARCHAR`
+* `DateNode` for SQL dates and times
+* `IntegerNode` (the existing
+  [NumberNode](https://wiki.opencog.org/w/NumberNode) is a vector of
+  floats)
+
+Specific databases might benefit from custom types:
+* `GeneNode`
+* `ProteinNode`
+* `URLNode`
 
 Using
 -----
