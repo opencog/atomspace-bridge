@@ -208,6 +208,7 @@ class ForeignStorage::Response
 		HandleSeq cols;
 		HandleSeq elts;
 		size_t it;
+		size_t nrows;
 		bool tabledata_cb(void)
 		{
 			it = 0;
@@ -219,13 +220,13 @@ class ForeignStorage::Response
 			{
 				Handle row = as->add_link(LIST_LINK, HandleSeq(elts));
 				as->add_link(EVALUATION_LINK, pred, row);
+				nrows++;
 			}
 			return false;
 		}
 		bool table_row_cb(const char *colname, const char * colvalue)
 		{
 			// Fetch the AtomType from the TypeNode for this column.
-printf("duuuude %lu %s is %s\n", it, colname, colvalue);
 			const Handle& typed_var = cols.at(it);
 			if (typed_var->getOutgoingAtom(0)->get_name().compare(colname))
 				throw RuntimeException(TRACE_INFO,

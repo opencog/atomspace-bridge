@@ -35,16 +35,24 @@
 
 (cog-connected? flystore)
 
-; What's up, Doc?
-(display (monitor-storage flystore))
-
 ; Load all of the table defintions.
 (cog-foreign-load-tables flystore)
 
 ; What is in the AtomSpace so far?
 (cog-prt-atomspace)
+(cog-report-counts)
 
-; Load one table
+; Take a look at the connection status
+(display (monitor-storage flystore))
+
+; Load all data from one table.
 (fetch-incoming-set (Predicate "cell_line"))
+
+; What have we found so far?
+(cog-report-counts)
+(display (monitor-storage flystore))
+
+; Load all data from all tables having a given column name
+(fetch-incoming-set (Variable "cell_line_id"))
 
 (cog-close flystore)

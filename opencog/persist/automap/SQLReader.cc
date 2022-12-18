@@ -92,6 +92,7 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 
 void ForeignStorage::load_tables(void)
 {
+	_num_queries++;
 	Response rp(conn_pool);
 	// This fetches everything except the postgres tables.
 	// Unfortunately, it fetchs view and other non-table things.
@@ -105,6 +106,7 @@ void ForeignStorage::load_tables(void)
 	rp.rs->foreach_row(&Response::strvec_cb, &rp);
 
 	_num_tables = tabnames.size();
+	_num_rows += _num_tables;
 printf("duude found %lu tables\n", _num_tables);
 	for (const std::string& tn : tabnames)
 		load_one_table(tn);
@@ -115,6 +117,8 @@ printf("duude found %lu tables\n", _num_tables);
 /// Load all rows in the table identified by the predicate.
 void ForeignStorage::load_table_data(const Handle& hp)
 {
+	_num_queries++;
+
 	// We are expecting this:
 	//   Signature
 	//       Predicate "some table"  <-- this is hp above
@@ -148,10 +152,12 @@ void ForeignStorage::load_table_data(const Handle& hp)
 	Response rp(conn_pool);
 	rp.exec(buff);
 
+	rp.nrows = 0;
 	rp.as = _atom_space;
 	rp.pred = hp;
 	rp.cols = listl->getOutgoingSet();
 	rp.rs->foreach_row(&Response::tabledata_cb, &rp);
+	_num_rows += rp.nrows
 }
 
 

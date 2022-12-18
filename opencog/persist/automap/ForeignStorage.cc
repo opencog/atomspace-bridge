@@ -96,7 +96,9 @@ void ForeignStorage::open(void)
 			"Failed to connect to %s\n", _name.c_str());
 
 	// Initialize stuff
+	_num_queries = 0;
 	_num_tables = 0;
+	_num_rows = 0;
 
 	// We don't really need to do this...
 	get_server_version();
@@ -162,8 +164,11 @@ std::string ForeignStorage::monitor(void)
 		return rs;
 	}
 
-	rs += "Connected to `" + _name + "`\n";
+	rs += "Connected to: " + _name + "\n";
+	rs += "Posgres server version: " + _server_version + "\n";
+	rs += "Number of queries issued: " + std::to_string(_num_queries) + "\n";
 	rs += "Number of loaded tables: " + std::to_string(_num_tables) + "\n";
+	rs += "Number of rows loaded: " + std::to_string(_num_rows) + "\n";
 	return rs;
 }
 
