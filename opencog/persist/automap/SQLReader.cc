@@ -53,22 +53,39 @@ void ForeignStorage::get_server_version(void)
 
 /* ================================================================ */
 
-void ForeignStorage::load_schemas(void)
+Handle ForeignStorage::load_one_table(const std::string& tablename)
+{
+printf("duuude found table ==>%s<==\n", tablename.c_str());
+#if 0
+	Response rp(conn_pool);
+
+	// udt_name is better than data_type
+	// If same table in two schemas, then add `AND table_schema = 'foo'`
+	// This will get bad results for user-defined types...
+	std::string buff =
+		"SELECT column_name, udt_name FROM information_schema.columns "
+		"WHERE table_name =  '" + tablename + "';";
+	rp.exec(buff);
+
+	rp.rs->foreach_row(&Response::strvecvec_cb, &rp);
+#endif
+	Handle tabh = _atom_space->add_node(PREDICATE_NODE, std::string(tablename));
+	return tabh;
+}
+
+void ForeignStorage::load_tables(void)
 {
 	std::vector<std::string> tabnames;
 
 	Response rp(conn_pool);
 	rp.strvec = &tabnames;
 
-	rp.exec("SELECT tablename FROM pg_tables;");
+	rp.exec("SELECT tablename FROM pg_tables WHERE schemaname != 'pg_catalog';");
 	rp.rs->foreach_row(&Response::strvec_cb, &rp);
 
 printf("duude found %lu tables\n", tabnames.size());
-	for (std::string tn : tabnames)
-	{
-printf("duuude found table ==>%s<==\n", tn.c_str());
-		_atom_space->add_node(PREDICATE_NODE, std::move(tn));
-	}
+	for (const std::string& tn : tabnames)
+		load_one_table(tn);
 }
 
 /* ================================================================ */

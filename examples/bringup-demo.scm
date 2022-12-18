@@ -8,8 +8,9 @@
 ;         https://ftp.flybase.net/releases/FB2022_06/psql/FB2022_06.sql.gz
 ;
 ; Step 2: Load it into postgres. At the shell:
-;         createdb flybase
-;         zcat FB2022_06.sql.gz |psql flybase
+;            createdb flybase
+;            zcat FB2022_06.sql.gz |psql flybase
+;         This took 5 hours, on my system.
 ;
 ; Step 3: Start a guile REPL shell. At the guile prompt, cut-n-paste
 ;         the commands below. Observe, make sure they work.
@@ -38,7 +39,7 @@
 (display (monitor-storage flystore))
 
 ; Start bulldozing around.
-(cog-foreign-load-schemas flystore)
+(cog-foreign-load-tables flystore)
 
 ; What is in the AtomSpace so far?
 (cog-prt-atomspace)

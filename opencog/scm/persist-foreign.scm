@@ -9,11 +9,11 @@
 (use-modules (opencog fdi-config))
 (load-extension (string-append opencog-ext-path-persist-fdi "libpersist-fdi") "opencog_persist_fdi_init")
 
-(export cog-foreign-load-schemas)
+(export cog-foreign-load-tables)
 
-(set-procedure-property! cog-foreign-load-schemas 'documentation
+(set-procedure-property! cog-foreign-load-tables 'documentation
 "
-  cog-foreign-load-schemas STORAGE - Load table schemas
+  cog-foreign-load-tables STORAGE - Load table definitions
 ")
 
 ;;;(set-procedure-property! sql-open 'documentation

@@ -63,6 +63,9 @@ class ForeignStorage : public StorageNode
 		int _server_version;
 		void get_server_version(void);
 
+		// Loading of schemas
+		Handle load_one_table(const std::string&);
+
 	public:
 		ForeignStorage(std::string uri);
 		ForeignStorage(const ForeignStorage&) = delete; // disable copying
@@ -103,7 +106,7 @@ class ForeignStorage : public StorageNode
 		void clear_stats(void); // reset stats counters.
 
 		// Extra functions
-		void load_schemas(void);
+		void load_tables(void);
 };
 
 class ForeignStorageNode : public ForeignStorage

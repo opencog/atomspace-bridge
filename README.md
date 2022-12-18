@@ -223,4 +223,8 @@ Some issues to ponder:
   SQL stored procedures. What are they? What do they do? What should we
   do with them?
 
+* What to do with views?
+
+* What if the same table appears in multiple schemas?
+
 -----------------------------------------------------------------------
