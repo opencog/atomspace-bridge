@@ -79,7 +79,6 @@ class ForeignStorage : public StorageNode
 		void erase(void) { kill_data(); }
 
 		void kill_data(void) {} // destroy DB contents
-		void print_range(const std::string&); // Debugging utility
 
 		// AtomStorage interface
 		void getAtom(const Handle&);

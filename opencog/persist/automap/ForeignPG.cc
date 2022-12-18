@@ -48,4 +48,55 @@ void ForeignStorage::get_server_version(void)
 	_server_version = rp.intval;
 }
 
+/* ================================================================ */
+
+void ForeignStorage::getAtom(const Handle&)
+{
+}
+
+Handle ForeignStorage::getLink(Type, const HandleSeq&)
+{
+	return Handle::UNDEFINED;
+}
+
+void ForeignStorage::fetchIncomingSet(AtomSpace*, const Handle&)
+{
+}
+
+void ForeignStorage::fetchIncomingByType(AtomSpace*, const Handle&, Type t)
+{
+}
+
+void ForeignStorage::storeAtom(const Handle&, bool synchronous = false)
+{
+}
+
+void ForeignStorage::removeAtom(AtomSpace*, const Handle&, bool recursive)
+{
+}
+
+void ForeignStorage::storeValue(const Handle& atom, const Handle& key)
+{
+}
+
+void ForeignStorage::updateValue(const Handle&, const Handle&, const ValuePtr&)
+{
+}
+
+void ForeignStorage::loadValue(const Handle& atom, const Handle& key)
+{
+}
+
+void ForeignStorage::loadType(AtomSpace*, Type)
+{
+}
+
+void ForeignStorage::loadAtomSpace(AtomSpace*)
+{
+}
+
+void ForeignStorage::storeAtomSpace(const AtomSpace*)
+{
+}
+
 /* ============================= END OF FILE ================= */
