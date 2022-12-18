@@ -1,0 +1,15 @@
+@PACKAGE_INIT@
+
+include("@CMAKE_INSTALL_PREFIX@/lib/cmake/AtomSpaceFDI/AtomSpaceAutoMapTargets.cmake")
+
+link_directories(
+	"@CMAKE_INSTALL_PREFIX@/lib/opencog/"
+)
+set(ATOMSPACE_AUTOMAP_LIBRARIES
+	persist-fdi
+)
+
+set(ATOMSPACE_AUTOMAP_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")
+set(ATOMSPACE_AUTOMAP_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
+set(ATOMSPACE_AUTOMAP_VERSION "@SEMANTIC_VERSION@")
+set(ATOMSPACE_AUTOMAP_FOUND 1)
