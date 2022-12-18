@@ -187,7 +187,7 @@ which could be marginally more efficient, presuming that the
     DefinedSchema "gene.allele"
     Signature
        Predicate "gene.allele"
-       List
+       VariableList
           TypedVariable
               Variable "symbol"
               Type 'GeneNode

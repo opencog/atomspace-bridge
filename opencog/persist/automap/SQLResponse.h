@@ -30,6 +30,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/TypeNode.h>
 
 #include "llapi.h"
 #include "ForeignStorage.h"
@@ -204,73 +205,37 @@ class ForeignStorage::Response
 
 		// Table data --------------------------------------------
 		Handle pred;
+		HandleSeq cols;
+		HandleSeq elts;
+		size_t it;
 		bool tabledata_cb(void)
 		{
-			HandleSeq elts;
-			tcol = nullptr;
+			it = 0;
+			elts.clear();
 			rs->foreach_column(&Response::table_row_cb, this);
 
 			// Add the col only if we know how to deal with the type
-			if (tcol)
-				elts.emplace_back(tcol);
-
-			Handle row = as->add_link(LIST_LINK, std::move(elts));
-			as->add_link(EVALUATION_LINK, pred, row);
+			if (0 < elts.size())
+			{
+				Handle row = as->add_link(LIST_LINK, HandleSeq(elts));
+				as->add_link(EVALUATION_LINK, pred, row);
+			}
 			return false;
 		}
 		bool table_row_cb(const char *colname, const char * colvalue)
 		{
-printf("duuuude %s is %s\n", colname, colvalue);
-#if 0
-			if ('c' == colname[0])
-			{
-				vcol = as->add_node(VARIABLE_NODE, std::string(colvalue));
-			}
-			else if ('t' == colname[0])
-			{
-				if (!strcmp(colvalue, "text") or
-				    !strcmp(colvalue, "varchar"))
-				{
-					tcol = as->add_node(TYPE_NODE, "ConceptNode");
-				}
-				else
-				if (!strcmp(colvalue, "int4") or
-				    !strcmp(colvalue, "int2") or
-				    !strcmp(colvalue, "int8") or
-				    !strcmp(colvalue, "float4") or
-				    !strcmp(colvalue, "float8") or
-				    !strcmp(colvalue, "bool"))
-				{
-					tcol = as->add_node(TYPE_NODE, "NumberNode");
-				}
-				else
-				if (!strcmp(colvalue, "timestamp") or
-				    !strcmp(colvalue, "date"))
-				{
-					// ignore, for now
-					tcol = nullptr;
+			// Fetch the AtomType from the TypeNode for this column.
+printf("duuuude %lu %s is %s\n", it, colname, colvalue);
+			const Handle& typed_var = cols.at(it);
+			if (typed_var->getOutgoingAtom(0)->get_name().compare(colname))
+				throw RuntimeException(TRACE_INFO,
+					"Intrnal Error: column names don't match");
 
-				}
-				else
-				if (!strcmp(colvalue, "bpchar"))
-				{
-					// In 'audit_chado' this is used as a binary true-false
-					// In 'feature' this is used for a hex md5sum
-					// ignore, for now
-					tcol = nullptr;
+			TypeNodePtr tnp = TypeNodeCast(typed_var->getOutgoingAtom(1));
+			Handle h = as->add_node(tnp->get_kind(), colvalue);
+			elts.emplace_back(h);
 
-				}
-				else
-				if (!strcmp(colvalue, "jsonb"))
-				{
-					// In 'allele_disease_variant'
-					// ignore, for now
-					tcol = nullptr;
-				}
-				else
-					printf("duuuude unknow coltype >>%s<<\n", colvalue);
-			}
-#endif
+			it++;
 			return false;
 		}
 

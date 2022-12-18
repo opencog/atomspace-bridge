@@ -131,7 +131,9 @@ void ForeignStorage::load_table_data(const Handle& hp)
 
 	std::string buff = "SELECT ";
 
-	// listl will be a ListLink; tvl will be a TypedVariableLink
+	// listl will be a VariableList; tvl will be a TypedVariableLink
+	// We build up a list of column names, based on what we already
+	// know about the table.
 	Handle listl = sigs[0]->getOutgoingAtom(1);
 	for (const Handle& tvl : listl->getOutgoingSet())
 	{
@@ -148,7 +150,7 @@ void ForeignStorage::load_table_data(const Handle& hp)
 
 	rp.as = _atom_space;
 	rp.pred = hp;
-	rp.varl = listl;
+	rp.cols = listl->getOutgoingSet();
 	rp.rs->foreach_row(&Response::tabledata_cb, &rp);
 }
 
