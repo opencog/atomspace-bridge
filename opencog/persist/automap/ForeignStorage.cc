@@ -58,9 +58,9 @@ ForeignStorage::ForeignStorage(std::string uri) :
 {
 	const char *yuri = _name.c_str();
 
-	if (strncmp(yuri, "rocks://", URIX_LEN))
+	if (strncmp(yuri, "postgres://", URIX_LEN))
 		throw IOException(TRACE_INFO,
-			"Unknown URI '%s'\nValid URI's start with 'rocks://'\n", yuri);
+			"Unknown URI '%s'\nValid URI's start with 'postgres://'\n", yuri);
 
 	// _uri = "rocks://" + file;
 	_name = _uri;

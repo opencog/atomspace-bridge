@@ -13,6 +13,7 @@ TARGET_LINK_LIBRARIES(persist-fdi
 	persist
 	storage-types
 	atomspace
+	${PGSQL_LIBRARIES}
 )
 
 # The `persist-fdi` below is the name of the shared lib, not the module.
