@@ -47,7 +47,7 @@
 
 LLConnection::LLConnection(void)
 {
-    opencog::set_thread_name("atoms:pgconn");
+    opencog::set_thread_name("foreign:pgconn");
     is_connected = false;
 }
 

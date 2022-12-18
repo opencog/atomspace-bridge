@@ -90,11 +90,10 @@ void ForeignStorage::open(void)
 	if (0 == _initial_conn_pool_size)
 		enlarge_conn_pool(POOL_SIZE, _name.c_str());
 
-	if (!connected())
+	_is_open = true;
+	if (not connected())
 		throw IOException(TRACE_INFO,
 			"Failed to connect to %s\n", _name.c_str());
-
-	_is_open = true;
 
 	// We don't really need to do this...
 	get_server_version();
@@ -118,6 +117,8 @@ bool ForeignStorage::connected(void)
 	LLConnection* db_conn = conn_pool.value_pop();
 	bool have_connection = db_conn->connected();
 	conn_pool.push(db_conn);
+
+	_is_open = have_connection;
 	return have_connection;
 }
 
