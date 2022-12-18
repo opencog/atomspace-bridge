@@ -18,7 +18,8 @@
 (use-modules (opencog persist-foreign))
 
 ; Declare the location of the database.
-; Note three slashes; for a remote DB, use the URL
+; If the DB is on the local machine, must use three slashes;
+; for a remote DB, use one of these URL's:
 ; postgres://example.com/flybase
 ; postgres://example.com/flybase?user=foo
 ; postgres://example.com/flybase?user=foo&password=bar
@@ -38,5 +39,8 @@
 
 ; Start bulldozing around.
 (cog-foreign-load-schemas flystore)
+
+; What is in the AtomSpace so far?
+(cog-prt-atomspace)
 
 (cog-close flystore)

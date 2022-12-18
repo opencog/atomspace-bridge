@@ -64,9 +64,10 @@ void ForeignStorage::load_schemas(void)
 	rp.rs->foreach_row(&Response::strvec_cb, &rp);
 
 printf("duude found %lu tables\n", tabnames.size());
-	for (const std::string& tn : tabnames)
+	for (std::string tn : tabnames)
 	{
 printf("duuude found table ==>%s<==\n", tn.c_str());
+		_atom_space->add_node(PREDICATE_NODE, std::move(tn));
 	}
 }
 
