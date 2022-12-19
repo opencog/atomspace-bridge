@@ -230,25 +230,40 @@ void ForeignStorage::load_row(const Handle& entry,     // Concept or Number
                               const Handle& colname,   // TypedVariable
                               const Handle& tablename) // PredicateNode
 {
-	_num_queries++;
-
-	if (not colname->is_type(TYPED_VARIABLE_LINK))
-		throw RuntimeException(TRACE_INFO,
-			"Internal error, expecting a TypedVariable\n");
-
 	// make_select() returns `SELECT col1,col2,.. FROM tablename`
 	std::string buff = make_select(tablename);
 
 	buff += "WHERE ";
 
-	load_selected_rows(tablename, buff);
+printf("hey   here it is --> %s\n", buff.c_str());
+	// load_selected_rows(tablename, buff);
 }
 
 /* ================================================================ */
 
-/// Load rows from tables that have the same column name
-void ForeignStorage::load_rows(const Handle& hv)
+/// Given an single entry from some row in some table, and a column
+/// description for that entry, find all tables that same column name,
+/// and load the corresponding row from those tables.
+///
+/// This is effectively assuming that `colname` is either a FOREIGN KEY
+/// or a PRIMARY KEY in some tables somewhere. We join *everything* with
+/// that key, and load it into the AtomSpace.
+void ForeignStorage::load_join(const Handle& entry,     // Concept or Number
+                               const Handle& colname)   // TypedVariable
 {
+	if (not colname->is_type(TYPED_VARIABLE_LINK))
+		throw RuntimeException(TRACE_INFO,
+			"Internal error, expecting a TypedVariable\n");
+
+	HandleSeq vlists(colname->getIncomingSetByType(VARIABLE_LIST));
+	for (const Handle& varli : vlists)
+	{
+		HandleSeq sigs(varli->getIncomingSetByType(SIGNATURE_LINK));
+		for (const Handle& sig : sigs)
+		{
+			load_row(entry, colname, sig->getOutgoingAtom(0));
+		}
+	}
 }
 
 /* ================================================================ */
