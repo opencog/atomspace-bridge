@@ -1,6 +1,9 @@
 ;
 ; basic-demo.scm - Basic demo of the most basic features.
 ;
+; This demo is written in scheme. The equivalent of this demo should
+; also work fine with the AtomSpace Python bindings.
+;
 ; Step 0: Install and configure Postgres.
 ;
 ; Step 1: Download the flybase DB from off the net.
@@ -10,10 +13,11 @@
 ; Step 2: Load it into postgres. At the shell:
 ;            createdb flybase
 ;            zcat FB2022_06.sql.gz |psql flybase
-;         This took 5 hours, on my system.
+;         This took 5 hours, on my (rather old) system.
 ;
 ; Step 3: Start a guile REPL shell. At the guile prompt, cut-n-paste
 ;         the commands below. Observe, make sure they work.
+;
 
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-foreign))

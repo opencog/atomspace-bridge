@@ -72,6 +72,7 @@ class ForeignStorage : public StorageNode
 		Handle load_one_table(const std::string&);
 		Handle get_row_desc(const Handle&);
 		std::string make_select(const Handle&);
+		void load_selected_rows(const Handle&, const std::string&);
 		void load_table_data(const Handle&);
 		void load_column(const Handle&);
 		void load_row(const Handle&, const Handle&, const Handle&);

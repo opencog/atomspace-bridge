@@ -173,14 +173,16 @@ std::string ForeignStorage::make_select(const Handle& tablename)
 /* ================================================================ */
 
 /// Load all rows in the table identified by the tablename.
-/// tablename must be a PredicateNode holding the name of an SQL table,
-/// and the signature of that table must already be known (loaded).
-void ForeignStorage::load_table_data(const Handle& tablename)
+/// `tablename` must be a PredicateNode attached to a Signature
+/// describing the the table.
+/// `select` must be an SQL SELECT statement.
+void ForeignStorage::load_selected_rows(const Handle& tablename,
+                                        const std::string& select)
 {
 	_num_queries++;
 
 	Response rp(conn_pool);
-	rp.exec(make_select(tablename) + ";");
+	rp.exec(select);
 
 	rp.nrows = 0;
 	rp.as = _atom_space;
@@ -188,6 +190,14 @@ void ForeignStorage::load_table_data(const Handle& tablename)
 	rp.cols = get_row_desc(tablename)->getOutgoingSet();
 	rp.rs->foreach_row(&Response::tabledata_cb, &rp);
 	_num_rows += rp.nrows;
+}
+
+/// Load all rows in the table identified by the tablename.
+/// tablename must be a PredicateNode holding the name of an SQL table,
+/// and the signature of that table must already be known (loaded).
+void ForeignStorage::load_table_data(const Handle& tablename)
+{
+	load_selected_rows(tablename, make_select(tablename) + ";");
 }
 
 /* ================================================================ */
@@ -226,11 +236,12 @@ void ForeignStorage::load_row(const Handle& entry,     // Concept or Number
 		throw RuntimeException(TRACE_INFO,
 			"Internal error, expecting a TypedVariable\n");
 
-	if (not tablename->is_type(PREDICATE_NODE))
-		throw RuntimeException(TRACE_INFO,
-			"Internal error, expecting a Predicate\n");
-
+	// make_select() returns `SELECT col1,col2,.. FROM tablename`
 	std::string buff = make_select(tablename);
+
+	buff += "WHERE ";
+
+	load_selected_rows(tablename, buff);
 }
 
 /* ================================================================ */
