@@ -72,7 +72,7 @@
 ; upwards from the column name, to the column descriptor, to the
 ; row descriptor, to each table descriptor that the column appears in.
 ;
-(define (get-tables NAME)
+(define (print-tables NAME)
 	(define column (Variable NAME))
 	(define coldesc (car (cog-incoming-by-type column 'TypedVariable)))
 	(define rowdescs (cog-incoming-by-type coldesc 'VariableList))
@@ -83,7 +83,7 @@
 		rowdescs))
 
 ; Do it. Print them out.
-(get-tables "genotype_id")
+(print-tables "genotype_id")
 
 ; ----------------------------------------------------
 ; Pick a table, any table. Load all data from that table.
@@ -100,6 +100,18 @@
 ; the table description. This will give us a hint of what we're
 ; going to see next.
 (cog-incoming-by-type (Predicate "genotype") 'Signature)
+
+; The above should look like this:
+;
+; (Signature (Predicate "genotype")
+;    (VariableList
+;       (TypedVariable (Variable "genotype_id") (Type "NumberNode"))
+;       (TypedVariable (Variable "uniquename") (Type "ConceptNode"))
+;       (TypedVariable (Variable "description") (Type "ConceptNode"))
+;       (TypedVariable (Variable "name") (Type "ConceptNode"))
+;       (TypedVariable (Variable "is_obsolete") (Type "NumberNode"))))
+;
+; The Variables are the column names, and the Type is the column type.
 
 ; Take a look at the 42nd row in the table.
 (list-ref (cog-incoming-set (Predicate "genotype")) 42)
@@ -122,46 +134,57 @@
 ; least one row from one table loaded, having this column. That's
 ; because a number, pulled out of thin air, doesn't have enough
 ; info on it to know where it belongs, what it's associated with.
+; The next section deals with this.
 
 (fetch-incoming-set (Number 362100))
 
+; What appened? Well, we saw previously that there were ten tables
+; that "genotype_id" as a column. So, ten rows, from ten tables, were
+; loaded. Lets look at them, row by row. Hmm. Apperently, not all of
+; the tables have a row for this genotype, and one table, the
+; "feature_genotype" table, has three rows for it. OK.
+
+(cog-get-root (Number 362100))
+
+; Holy cow. Well, that's prety boring. Apparently, most tables are just
+; relations, pointing to things in other tables. Well, that's should not
+; be a surprise. The genotypes for a large, complex tangled graph, with
+; edges going from here to there, everywhere. There's no easy way to
+; encode a graph in SQL, except to use lots of FOREIGN KEY's connecting
+; hundreds of tables together.  And that's exactly what flybase does.
+
 ; ----------------------------------------------------
-; Load all data from all tables having a given column name
-(fetch-incoming-set (Variable "cell_line_id"))
+; Suppose that we know, a priori some entry in some column in some table.
+; It can be fetdhed directly, as follows. We happen to "just know" that
+; (Number 51808) is a valid "genotype_id". So go get that row, only.
 
-; What have we found so far?
+(cog-foreign-load-row flystore
+	(Predicate "genotype")
+	(Variable "genotype_id")
+	(Number 51808))
+
+(cog-get-root (Number 51808))
+
+; ----------------------------------------------------
+; OK. So the above is getting boring. Lets do some bulk loads.
+; Load all data from all tables having a given column name.
+; Somewhat incautiously, well pick the genotype_id column. There's
+; some fair amount of data there. This load will take 1 to 5 minutes,
+; and will chew up about 7GBytes of RAM.
+(fetch-incoming-set (Variable "genotype_id"))
+
+; What have we get?
 (cog-report-counts)
-(count-all)  ; Reports a grand-total number of Atoms in the AtomSpace.
-(display (monitor-storage flystore))
+(count-all)      ; Over 10 million atoms, it seems.
+(display (monitor-storage flystore))  ; Almost 4 million rows.
 
-; So far, all we've done above is to load data. Lets do some simple
-; exploring. Here's some gene:  (Concept "S2R+-Gmap-GFP-7") Lets
-; look at all the rows that it's in.
-(cog-get-root (Concept "S2R+-Gmap-GFP-7"))
-
-; This should print out
-; ((Evaluation (Predicate "cell_line")
-;    (List (Number "273") (Concept "S2R+-Gmap-GFP-7")
-;          (Concept "FBtc0000277") (Number "1") (Number "0"))))
-; which is pretty meaningless without a table schema.  What's the
-; schema?
-
-(cog-incoming-by-type (Predicate "cell_line") 'Signature)
-
-; So we see that its this:
-; ((Signature (Predicate "cell_line")
-;    (VariableList
-;     (TypedVariable (Variable "cell_line_id") (Type "NumberNode"))
-;     (TypedVariable (Variable "name") (Type "ConceptNode"))
-;     (TypedVariable (Variable "uniquename") (Type "ConceptNode"))
-;     (TypedVariable (Variable "organism_id") (Type "NumberNode"))
-;     (TypedVariable (Variable "is_obsolete") (Type "NumberNode")))))
-;
-; We conclude that (Concept "S2R+-Gmap-GFP-7") lies in a column
-; called "name". Woo hoo! Such information!
-
-; -----------
+; ----------------------------------------------------
 ; Let's get greedy, and just try to load *everything*.
+; This will turn out to be a mistake. But let's make it.
+; Be prepared to kill the guile process, else it will use up all the RAM
+; on your system. The OOM killer will eventually run, but, until it does,
+; your mouse and keyboard will be unresponsive. So kill it manually,
+; before it gets out of control.
 
 (define num-tables (length (cog-get-atoms 'PredicateNode)))
 (define tabno 0)
