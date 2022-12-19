@@ -97,15 +97,39 @@
 (define (get-vardecl COL)
 	(define varname (cog-node 'Variable COL))
 	(if (nil? varname) #f
-		(vardecl (car (cog-incoming-by-type varname 'TypedVariable)))))
+		(car (cog-incoming-by-type varname 'TypedVariable))))
 
 (define (valid-col? COL) (get-vardecl COL))
 
+(define (valid-table? TBL)
+	#t)
+
+(define (foo-walk TBL COL)
+	(format #t "duuude yo ~A col=~A\n" TBL COL))
+
+; Allow user to pick a table, then go to that table.
 (define (table-walk COL)
 	(define vardecl (get-vardecl COL))
-	(format #t "rock it ~A ~A\n" COL vardecl)
-)
+	(define varlis (cog-incoming-by-type vardecl 'VariableList))
+	(define sigs (map
+		(lambda (VARLI) (car (cog-incoming-by-type VARLI 'Signature)))
+		varlis))
+	(define preds (map gar sigs))
+	(format #t "Tables containg the column '~A' are:\n" COL)
+	(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) preds)
+	(format #t "Pick a table from the above:\n")
+	(format #t "select-target> ~!")
+	(define tbl-str (get-line (current-input-port)))
+	(cond
+		((equal? 0 (string-length tbl-str)) (table-walk COL))
+		((equal? "q" tbl-str) #f)
+		((valid-table? tbl-str) (foo-walk tbl-str COL))
+		(else
+			(begin
+				(format #t "Unknown table '~A'\n" tbl-str)
+				(table-walk COL)))))
 
+; Allow user to pick a column, then go to that column
 (define (edge-walk ROW)
 	(print-row ROW)
 	(format #t "Enter a column name. Enter 'q' to return to the main prompt.\n")
@@ -119,7 +143,6 @@
 			(begin
 				(format #t "Unknown column '~A'\n" col-str)
 				(edge-walk ROW)))))
-)
 
 ;; ---------------------------------------------------
 
