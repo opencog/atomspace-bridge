@@ -142,7 +142,7 @@
 ; that "genotype_id" as a column. So, ten rows, from ten tables, were
 ; loaded. Lets look at them, row by row. Hmm. Apparently, not all of
 ; the tables have a row for this genotype, and one table, the
-; "feature_genotype" table, has three rows for it. OK.
+; "Class II allele. Eye discs are very small. Larval survival rate of homozygotes is 30% of heterozygotes with wild type."feature_genotype" table, has three rows for it. OK.
 
 (cog-get-root (Number 362100))
 
@@ -153,20 +153,21 @@
 ; encode a graph in SQL, except to use lots of FOREIGN KEY's connecting
 ; hundreds of tables together.  And that's exactly what flybase does.
 
+; Here's another one, that's a little more interesting.
+; Apparently, it's a "Class II allele. Eye discs are very small. Larval
+; survival rate of homozygotes is 30% of heterozygotes with wild type."
+(fetch-incoming-set (Number 51808))
+(cog-get-root (Number 51808))
+
 ; ----------------------------------------------------
 ; Suppose that we know, a priori some entry in some column in some table.
 ; It can be fetdhed directly, as follows. We happen to "just know" that
-; (Number 51808) is a valid "genotype_id". So go get that row, only.
+; (Number 464522) is a valid "genotype_id". So go get that row, only.
 
 (cog-foreign-load-row flystore
 	(Predicate "genotype")
 	(Variable "genotype_id")
-	(Number 51808))
-
-: The above will return that one row, only.  We can also look to see
-; what other rows there may be, but there shouldn't be any:
-
-(cog-get-root (Number 51808))
+	(Number 464522))
 
 ; ----------------------------------------------------
 ; OK. So the above is getting boring. Lets do some bulk loads.
