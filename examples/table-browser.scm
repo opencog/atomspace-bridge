@@ -28,7 +28,7 @@
 (define (print-table PRED)
 	(define siggy (car (cog-incoming-by-type PRED 'Signature)))
 	(define varli (cog-value-ref siggy 1))
-	(format #t "Table >>~A<< columns:\n" (cog-name PRED))
+	(format #t "Table '~A' columns:\n" (cog-name PRED))
 	(for-each
 		(lambda (TYVAR)
 			(format #t "   ~A \ttype: ~A\n"
@@ -82,9 +82,9 @@
 					(table-select))
 				(let ((start (current-time)))
 
-	(format #t "Loading ~A. This might take a few minutes; please be patient!\n" tbl-str)
+	(format #t "Loading '~A'. This might take a few minutes; please be patient!\n" tbl-str)
 	(fetch-incoming-set tablename)
-	(format #t "Loaded ~A in ~A seconds\n" tbl-str (- (current-time) start))
+	(format #t "Loaded '~A' in ~A seconds\n" tbl-str (- (current-time) start))
 	(print-table tablename)
 
 	; Return the table name
@@ -93,8 +93,18 @@
 
 ;; ---------------------------------------------------
 
-(define (valid-col? COL ROW)
-	#f)
+; Get the TypedVariable for string COL, else #f
+(define (get-vardecl COL)
+	(define varname (cog-node 'Variable COL))
+	(if (nil? varname) #f
+		(vardecl (car (cog-incoming-by-type varname 'TypedVariable)))))
+
+(define (valid-col? COL) (get-vardecl COL))
+
+(define (table-walk COL)
+	(define vardecl (get-vardecl COL))
+	(format #t "rock it ~A ~A\n" COL vardecl)
+)
 
 (define (edge-walk ROW)
 	(print-row ROW)
@@ -104,9 +114,11 @@
 	(cond
 		((equal? 0 (string-length col-str)) (edge-walk ROW))
 		((equal? "q" col-str) #f)
-		((valid-col? col-str ROW)
-			(format #t "rock it\n"))
-		(else (edge-walk ROW)))
+		((valid-col? col-str) (table-walk col-str))
+		(else
+			(begin
+				(format #t "Unknown column '~A'\n" col-str)
+				(edge-walk ROW)))))
 )
 
 ;; ---------------------------------------------------
