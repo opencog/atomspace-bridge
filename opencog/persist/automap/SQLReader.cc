@@ -144,7 +144,8 @@ Handle ForeignStorage::get_row_desc(const Handle& tablename)
 {
 	if (not tablename->is_type(PREDICATE_NODE))
 		throw RuntimeException(TRACE_INFO,
-			"Internal error, expecting the table name to be a Predicate\n");
+			"Error: Expecting the table name to be a Predicate; got %s\n",
+			tablename->to_short_string().c_str());
 
 	HandleSeq sigs = tablename->getIncomingSetByType(SIGNATURE_LINK);
 	if (1 != sigs.size())
@@ -258,9 +259,9 @@ void ForeignStorage::load_one_row(const Handle& entry,     // Concept or Number
 /// that row, a column name for that entry, and the table name.
 /// Converts the column name into a column descriptor and calls the
 /// function above.
-Handle ForeignStorage::load_row(const Handle& entry,     // Concept or Number
+Handle ForeignStorage::load_row(const Handle& tablename, // PredicateNode
                                 const Handle& colname,   // VariableNode
-                                const Handle& tablename) // PredicateNode
+                                const Handle& entry)     // Concept or Number
 {
 	if (not colname->is_type(VARIABLE_NODE))
 		throw RuntimeException(TRACE_INFO,
