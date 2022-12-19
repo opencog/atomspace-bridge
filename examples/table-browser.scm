@@ -36,27 +36,31 @@
 		(cog-outgoing-set varli)))
 
 ;; ---------------------------------------------------
+;
+; Select a table and load it.
 (define (table-select)
 	(format #t "Select a table to load. Enter '?' to get a list of tables:\n")
 	(define tbl-str (get-line (current-input-port)))
 
 	;; (format #t "Read >>~A<<\n" tbl-str)
-	(if (equal? 0 (string-length tbl-str))
-		(table-select)
-
-	(if (equal? "?" tbl-str)
-		(begin
-			(for-each (lambda (PRED)
-				(format #t "   ~A\n" (cog-name PRED)))
-				(cog-get-atoms 'Predicate))
+	(cond
+		((equal? 0 (string-length tbl-str))
 			(table-select))
 
-	(let ((tablename (cog-node 'Predicate tbl-str)))
-		(if (nil? tablename)
+		((equal? "?" tbl-str)
 			(begin
-				(format #t "Unknown table >>~A<<\n" tbl-str)
-				(table-select))
-			(let ((start (current-time)))
+				(for-each (lambda (PRED)
+					(format #t "   ~A\n" (cog-name PRED)))
+					(cog-get-atoms 'Predicate))
+				(table-select)))
+
+		(else
+			(let ((tablename (cog-node 'Predicate tbl-str)))
+			(if (nil? tablename)
+				(begin
+					(format #t "Unknown table >>~A<<\n" tbl-str)
+					(table-select))
+				(let ((start (current-time)))
 
 	(format #t "Loading ~A. This might take a few minutes; please be patient!\n" tbl-str)
 	(fetch-incoming-set tablename)
@@ -64,30 +68,36 @@
 	(print-table tablename)
 	))))))
 
-(table-select)
+;; ---------------------------------------------------
+(define (prt-commands)
+	(format #t "Available commands:\n")
+	(format #t "   exit -- quit\n")
+	(format #t "   shell -- escape into the guile shell\n")
+	(format #t "   load-table -- to load an entire SQL table\n"))
 
-#! ---------
 (define (browser-shell)
-	(define inp (get-line (current-input-port)))
-	(format #t "yo ~A\n" inp)
-	(browser-shell))
+	(format #t "Enter a command. Enter '?' for a list of commands\n")
+	(define cmd-str (get-line (current-input-port)))
+	(format #t "yo ~A\n" cmd-str)
+	(cond
+		((equal? 0 (string-length cmd-str)) #f)
+
+		((equal? "?" cmd-str) (prt-commands))
+		((equal? "exit" cmd-str) (exit))
+		((equal? "shell" cmd-str) #f)
+
+		((equal? "load-table" cmd-str) (table-select))
+
+		(else
+			(format #t "Unknown command ~A\n" cmd-str)))
+
+	(if (not (equal? "shell" cmd-str))
+		(browser-shell)))
 
 (browser-shell)
 
 
-(define (print-tables NAME)
-	(define column (Variable NAME))
-	(define coldesc (car (cog-incoming-by-type column 'TypedVariable)))
-	(define rowdescs (cog-incoming-by-type coldesc 'VariableList))
-	(map
-		(lambda (ROWDESC)
-			(define siggy (car (cog-incoming-by-type ROWDESC 'Signature)))
-			(cog-value-ref siggy 0))
-		rowdescs))
-
-; Do it. Print them out.
-(print-tables "genotype_id")
-
+#! ---------
 ; ----------------------------------------------------
 ; Pick a table, any table. Load all data from that table.
 ; The genotype table is medium-sized, it contains about
