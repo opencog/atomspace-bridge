@@ -92,6 +92,10 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 
 void ForeignStorage::load_tables(void)
 {
+	if (not _is_open)
+		throw RuntimeException(TRACE_INFO,
+			"Error: can't load tables; StorageNode is not open!");
+
 	_num_queries++;
 	Response rp(conn_pool);
 	// This fetches everything except the postgres tables.
