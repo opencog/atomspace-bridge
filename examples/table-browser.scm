@@ -29,21 +29,35 @@
 	(define siggy (car (cog-incoming-by-type PRED 'Signature)))
 	(define varli (cog-value-ref siggy 1))
 	(format #t "Table >>~A<< columns:\n" (cog-name PRED))
-	(for-each (lambda (TYVAR)
-		(format #t "   ~A \ttype: ~A\n"
-			(cog-name (cog-value-ref TYVAR 0))
-			(cog-name (cog-value-ref TYVAR 1))))
-		(cog-outgoing-set varli)))
+	(for-each
+		(lambda (TYVAR)
+			(format #t "   ~A \ttype: ~A\n"
+				(cog-name (cog-value-ref TYVAR 0))
+				(cog-name (cog-value-ref TYVAR 1))))
+		(cog-outgoing-set varli))
+	(format #t "\n"))
 
 (define (print-row ROW)
-	(format #t "duuude ~A\n" ROW)
-)
+	(define table (gar ROW))
+	(define naked (gdr ROW))
+	(define siggy (car (cog-incoming-by-type table 'Signature)))
+	(define varli (cog-value-ref siggy 1))
+	(format #t "Table >>~A<< columns:\n" (cog-name table))
+	(for-each
+		(lambda (TYVAR VALU)
+			(format #t "   ~A \tvalue: ~A\n"
+				(cog-name (cog-value-ref TYVAR 0))
+				(cog-name VALU)))
+		(cog-outgoing-set varli)
+		(cog-outgoing-set naked)))
 
 ;; ---------------------------------------------------
 ;
 ; Select a table and load it.
 (define (table-select)
-	(format #t "Select a table to load. Enter '?' to get a list of tables:\n")
+	(format #t "Enter the name of a table to load. Enter '?' to get a list of tables.\n")
+	(format #t "Caution: some tables are huge, and require dozens of GB to load.\n")
+	(format #t "select-table> ~!")
 	(define tbl-str (get-line (current-input-port)))
 
 	;; (format #t "Read >>~A<<\n" tbl-str)
@@ -92,8 +106,8 @@
 
 (define (browser-shell)
 	(format #t "Enter a command. Enter '?' for a list of commands\n")
+	(format #t "browser> ~!")
 	(define cmd-str (get-line (current-input-port)))
-	(format #t "yo ~A\n" cmd-str)
 	(cond
 		((equal? 0 (string-length cmd-str)) #f)
 
@@ -114,6 +128,7 @@
 		((equal? "random-row" cmd-str)
 			(begin
 				(when (not curr-rows)
+					(format #t "This may take a few minutes for large tables\n")
 					(set! curr-rows
 						(cog-incoming-by-type (Predicate curr-table) 'Evaluation)))
 				(print-row (list-ref curr-rows (random (length curr-rows))))))
