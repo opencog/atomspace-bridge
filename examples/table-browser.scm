@@ -23,7 +23,29 @@
 (define table-descs (cog-foreign-load-tables flystore))
 (format #t "Loaded ~A table descriptions\n" (length table-descs))
 
+(define (table-select)
+	(format #t "Select a table to load. Enter '?' to get a list of tables:\n")
+	(define tbl-str (get-line (current-input-port)))
 
+	(when (equal? 0 (string-length tbl-str))
+		(table-select))
+
+	(when (equal? "?" tbl-str)
+		(for-each (lambda (PRED)
+			(format #t "   ~A\n" (cog-name PRED)))
+			(cog-get-atoms 'Predicate))
+		(table-select))
+
+	(define tablename (cog-node 'Predicate tbl-str))
+	(when (nil? tablename)
+		(format #t "Unknown table >>~A<<\n" tbl-str)
+		(table-select))
+
+	(fetch-incoming-set tablename))
+
+(table-select)
+
+#! ---------
 (define (browser-shell)
 	(define inp (get-line (current-input-port)))
 	(format #t "yo ~A\n" inp)
@@ -31,7 +53,6 @@
 
 (browser-shell)
 
-#! ---------
 
 (define (print-tables NAME)
 	(define column (Variable NAME))
@@ -50,7 +71,6 @@
 ; Pick a table, any table. Load all data from that table.
 ; The genotype table is medium-sized, it contains about
 ; half-a-million entries.
-(fetch-incoming-set (Predicate "genotype"))
 
 (fetch-incoming-set (Number 51808))
 (cog-get-root (Number 51808))
