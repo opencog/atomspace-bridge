@@ -118,7 +118,7 @@
 
 ; The above is a bit sloppy: it first gets all half-a-million rows,
 ; and then picks the 42nd one. So it takes a second to do this.
-; No matter; we're just sampling to see whats going on.
+; No matter; we're just sampling to see what's going on.
 ; BTW, these "row numbers" are not reproducible; they will change
 ; from session to session, and they will change if rows are added.
 
@@ -138,9 +138,9 @@
 
 (fetch-incoming-set (Number 362100))
 
-; What appened? Well, we saw previously that there were ten tables
+; What happened? Well, we saw previously that there were ten tables
 ; that "genotype_id" as a column. So, ten rows, from ten tables, were
-; loaded. Lets look at them, row by row. Hmm. Apperently, not all of
+; loaded. Lets look at them, row by row. Hmm. Apparently, not all of
 ; the tables have a row for this genotype, and one table, the
 ; "feature_genotype" table, has three rows for it. OK.
 
@@ -162,6 +162,9 @@
 	(Predicate "genotype")
 	(Variable "genotype_id")
 	(Number 51808))
+
+: The above will return that one row, only.  We can also look to see
+; what other rows there may be, but there shouldn't be any:
 
 (cog-get-root (Number 51808))
 
@@ -216,7 +219,7 @@
 
 ; Then `rlwrap telnet localhost 17001` and run the load from there.
 ; That way, the main guile prompt is available for monitoring progress.
-; This is the prefered way to interact, for any kind of large,
+; This is the preferred way to interact, for any kind of large,
 ; long-running jobs.
 
 ; Here's a row-count monitor:
