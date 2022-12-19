@@ -67,6 +67,19 @@ WHERE
 SELECT * FROM cell_line;
 cell_line_id |  name   | uniquename  | organism_id |  timeaccessioned  |  timelastmodified  | is_obsolete
 
+(use-modules (opencog cogserver))
+(start-cogserver)
+(for-each
+	(lambda (PRED)
+		(define start-time (current-time))
+		(format #t "Start loading table ~A\n" (cog-name PRED))
+		(fetch-incoming-set PRED)
+		(format #t "Done loading in ~A secs\n" (- (current-time) start-time)))
+	(cog-get-atoms 'PredicateNode))
+
+(cog-report-counts)
+(display (monitor-storage flystore))
+
 
 
 -------

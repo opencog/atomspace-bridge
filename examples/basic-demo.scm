@@ -85,6 +85,22 @@
 ; We conclude that (Concept "S2R+-Gmap-GFP-7") lies in a column
 ; called "name". Woo hoo! Such information!
 
+; -----------
+; Let's get greedy, and just try to load *everything*.
+
+(for-each
+	(lambda (PRED)
+		(define start-time (current-time))
+		(format #t "Start loading table ~A\n" (cog-name PRED))
+		(fetch-incoming-set PRED)
+		(format #t "... Done loading in ~A secs\n" (- (current-time) start-time))
+		(format #t "\nStatus:\n")
+		(display (monitor-storage flystore))
+		(format #t "----------------------\n"))
+	(cog-get-atoms 'PredicateNode))
+
+; Well, the above will take a long time.  And use up a LOT of RAM.
+
 ; Close the connection to storage.
 (cog-close flystore)
 

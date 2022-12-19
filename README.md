@@ -10,15 +10,16 @@ AtomSpace itself. For that, see the native
 StorageNode.
 
 The following are desired features:
-* Mapping from the SQL tables to AtomSpace structures is mostly
-  automated, by importing pre-existing SQL table schemas.
-* Customization of the mapping is possible, so as to allow more
-  "natural" [Atomese](https://wiki.opencog.org/w/Atomese)
-  representations.
-* Both the reading and the update of the SQL tables is possible.
+* Creation of maps from the SQL tables to AtomSpace structures is
+  mostly or fully automated, by importing pre-existing SQL table schemas.
+* Custom maps can be specified, so as to allow more "natural"
+  [Atomese](https://wiki.opencog.org/w/Atomese) representations.
+* Both the read and the update of the SQL tables is provided.
 
-This could be called a "Foreign Data Interface" (FDI) to the AtomSpace.
-At this time, it supports Postgres only.
+We're call this "automapping" but it could also be called a
+"Foreign Data Interface" (FDI) to the AtomSpace.
+
+At this time, only Postgres is supported.
 
 Status
 ------
@@ -44,13 +45,13 @@ SQL database.
 For each row in some table `tablename`, create a conventional
 Atomese [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink).
 ```
-   Evaluation
-      Predicate "tablename"
-      List
-         Concept "column 1" ; If column type is a string
-         Concept "column 2"
+   Evaluation                ; A single row in the table.
+      Predicate "tablename"  ; Replace by actual name of table.
+      List                   ; This list is one row in the table.
+         Concept "column 1"  ; Entry in that column, if its a string.
+         NumberNode 42       ; If that column type is a number.
          ...
-         NumberNode NNN   ; If column type is a number.
+         Concept "stuffs"    ; Last column in the table.
 ```
 
 Primary and Foreign Keys
@@ -64,7 +65,7 @@ is surprisingly flexible.
 
 Other mappings are possible; however, there is no natural way of asking
 Postgres which table columns are foreign keys, and which other tables
-they might reference. If this info was possible, then we could have a
+they might reference. If this info was available, then we could have a
 an Atomese representation that does NOT keep any keys at all in the
 AtomSpace, and instead just makes direct links between table rows.
 So, for example:
@@ -94,16 +95,16 @@ Its simple and easy. It wastes some RAM, but so what.
 
 Table Schemas
 -------------
-SQL table definitions are schemas that provide a definition of the
-columns of that table.  It is presumably useful to import these into
-the AtomSpace. Below is a proposed mapping.
+SQL table definitions provide a definition of the columns of that
+table.  These are imported into the AtomSpace, where they are used
+to fhind they names of columns, and the types. (Note that the
+`EvaluationLink` above does not contain the column names.)
+Below is the current mapping.
 
 The SQL column names are recorded as
 [VariableNode](https://wiki.opencog.org/w/VariableNode) names.
 The type of each variable *aka* column is given.
 ```
- DefineLink
-    DefinedSchema "tablename"
     Signature
        Predicate "tablename"
        List
@@ -117,8 +118,6 @@ The type of each variable *aka* column is given.
 ```
 
 See the OpenCog wiki:
-* [DefineLink](https://wiki.opencog.org/w/DefineLink)
-* [DefinedSchemaNode](https://wiki.opencog.org/w/DefinedSchemaNode)
 * [SignatureLink](https://wiki.opencog.org/w/SignatureLink)
 * [VariableNode](https://wiki.opencog.org/w/VariableNode)
 * [TypedVariable](https://wiki.opencog.org/w/TypedVariable)
@@ -137,6 +136,7 @@ Specific databases might benefit from custom types:
 * `GeneNode`
 * `ProteinNode`
 * `URLNode`
+* `HumanReadableDescriptionNode`
 
 Using
 -----
@@ -155,13 +155,18 @@ Examples of accessing data in a foreign database.
 (cog-open foreign-db)
 
 ; Load the *entire* table `gene.allele`. Optional; only if you actually
-; want the whole table in RAM. We know the table name, and we know that
-; we'll be mapping rows to the EvaluationLink.
-(fetch-incoming-by-type (Predicate "gene.allele") 'EvaluationLink)
+; want the whole table in RAM. We know the table name, and give it
+; directly.
+(fetch-incoming-set (Predicate "gene.allele"))
 
 ; Instead of loading entire tables, perhaps we only want all rows of
 ; all tables that mention gene CG7069.
-(fetch-incoming-by-type (Concept "CG7069") 'List)
+(fetch-incoming-set (Concept "CG7069"))
+
+; Perhaps we plan to do a join. So, load *all* tables that have a given
+; column name. In this case, all tables having a column called
+; "genotype".
+(fetch-incoming-set (Variable ""genotype"))
 
 ; StorageNodes do have the ability to run generic queries, and we could,
 ; in principle, translate at least some of the simpler Atomese queries
@@ -174,18 +179,16 @@ Examples of accessing data in a foreign database.
 (automap-get-row "gene.allele" (Concept "CG7069"))
 ```
 
-It could be conventient to introduce special-purpose
+It could be convenient to introduce special-purpose
 [Atom types](https://wiki.opencog.org/w/Atom_types), such as
 `GeneNode` from the agi-bio project. This would allow queries such
 as
 ```
-(fetch-incoming-by-type (Gene "CG7069") 'List)
+(fetch-incoming-set (Gene "CG7069"))
 ```
 which could be marginally more efficient, presuming that the
 `gene.allele` table schema was properly declared:
 ```
- DefineLink
-    DefinedSchema "gene.allele"
     Signature
        Predicate "gene.allele"
        VariableList
@@ -206,9 +209,8 @@ which could be marginally more efficient, presuming that the
 
 Building and Installing
 -----------------------
-As of now, this module can be built. It compiles and sort-of-ish does
-stuff.  The build process is identical to that of other modules in
-OpenCog.
+This module works, and can load tables.  The build process is identical
+to that of other modules in OpenCog.
 
 ### Prerequisites
 
@@ -239,6 +241,8 @@ Perform the following steps at the shell prompt:
 Open Questions
 --------------
 Some issues to ponder:
+* What's the right solution to the foreign-key dilemma?
+
 * The flybase dataset seems to have a large number of extremely complex
   SQL stored procedures. What are they? What do they do? What should we
   do with them?
