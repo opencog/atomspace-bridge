@@ -35,6 +35,10 @@
 			(cog-name (cog-value-ref TYVAR 1))))
 		(cog-outgoing-set varli)))
 
+(define (print-row ROW)
+	(format #t "duuude ~A\n" ROW)
+)
+
 ;; ---------------------------------------------------
 ;
 ; Select a table and load it.
@@ -66,14 +70,25 @@
 	(fetch-incoming-set tablename)
 	(format #t "Loaded ~A in ~A seconds\n" tbl-str (- (current-time) start))
 	(print-table tablename)
+
+	; Return the table name
+	tbl-str
 	))))))
 
 ;; ---------------------------------------------------
+
 (define (prt-commands)
 	(format #t "Available commands:\n")
 	(format #t "   exit -- quit\n")
 	(format #t "   shell -- escape into the guile shell\n")
-	(format #t "   load-table -- to load an entire SQL table\n"))
+	(format #t "   load-table -- to load an entire SQL table\n")
+	(format #t "   set-table -- to set the current SQL table to browse\n")
+	(format #t "   random-row -- print a random row in the current table\n")
+)
+
+; State:
+(define curr-table #f)
+(define curr-rows #f)
 
 (define (browser-shell)
 	(format #t "Enter a command. Enter '?' for a list of commands\n")
@@ -86,7 +101,22 @@
 		((equal? "exit" cmd-str) (exit))
 		((equal? "shell" cmd-str) #f)
 
-		((equal? "load-table" cmd-str) (table-select))
+		((equal? "load-table" cmd-str)
+			(begin
+				(set! curr-table (table-select))
+				(set! curr-rows #f)))
+
+		((equal? "set-table" cmd-str)
+			(begin
+				(set! curr-table cmd-str)
+				(set! curr-rows #f)))
+
+		((equal? "random-row" cmd-str)
+			(begin
+				(when (not curr-rows)
+					(set! curr-rows
+						(cog-incoming-by-type (Predicate curr-table) 'Evaluation)))
+				(print-row (list-ref curr-rows (random (length curr-rows))))))
 
 		(else
 			(format #t "Unknown command ~A\n" cmd-str)))
