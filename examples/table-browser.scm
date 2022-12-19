@@ -27,21 +27,28 @@
 	(format #t "Select a table to load. Enter '?' to get a list of tables:\n")
 	(define tbl-str (get-line (current-input-port)))
 
-	(when (equal? 0 (string-length tbl-str))
-		(table-select))
+	;; (format #t "Read >>~A<<\n" tbl-str)
+	(if (equal? 0 (string-length tbl-str))
+		(table-select)
 
-	(when (equal? "?" tbl-str)
-		(for-each (lambda (PRED)
-			(format #t "   ~A\n" (cog-name PRED)))
-			(cog-get-atoms 'Predicate))
-		(table-select))
+	(if (equal? "?" tbl-str)
+		(begin
+			(for-each (lambda (PRED)
+				(format #t "   ~A\n" (cog-name PRED)))
+				(cog-get-atoms 'Predicate))
+			(table-select))
 
-	(define tablename (cog-node 'Predicate tbl-str))
-	(when (nil? tablename)
-		(format #t "Unknown table >>~A<<\n" tbl-str)
-		(table-select))
+	(let ((tablename (cog-node 'Predicate tbl-str)))
+		(if (nil? tablename)
+			(begin
+				(format #t "Unknown table >>~A<<\n" tbl-str)
+				(table-select))
+			(let ((start (current-time)))
 
-	(fetch-incoming-set tablename))
+	(format #t "Loading ~A. This might take a few minutes; please be patient!\n" tbl-str)
+	(fetch-incoming-set tablename)
+	(format #t "Loaded ~A in ~A seconds\n" tbl-str (- (current-time) start))
+	))))))
 
 (table-select)
 
