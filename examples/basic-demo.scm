@@ -49,7 +49,7 @@
 (fetch-incoming-set (Predicate "cell_line"))
 
 ; What have we found so far?
-(cog-report-counts)
+(cog-report-counts)   ; Reports number of Atoms, by type.
 (display (monitor-storage flystore))
 
 ; Load all data from all tables having a given column name
@@ -57,6 +57,7 @@
 
 ; What have we found so far?
 (cog-report-counts)
+(count-all)  ; Reports a grand-total number of Atoms in the AtomSpace.
 (display (monitor-storage flystore))
 
 ; So far, all we've done above is to load data. Lets do some simple
@@ -88,10 +89,14 @@
 ; -----------
 ; Let's get greedy, and just try to load *everything*.
 
+(define num-tables (length (cog-get-atoms 'PredicateNode)))
+(define tabno 0)
 (for-each
 	(lambda (PRED)
 		(define start-time (current-time))
-		(format #t "Start loading table ~A\n" (cog-name PRED))
+		(set! tabno (+ 1 tabno))
+		(format #t "Start loading table ~A/~A  ~A\n"
+			tabno num-tables (cog-name PRED))
 		(fetch-incoming-set PRED)
 		(format #t "... Done loading in ~A secs\n" (- (current-time) start-time))
 		(format #t "\nStatus:\n")
@@ -100,7 +105,39 @@
 	(cog-get-atoms 'PredicateNode))
 
 ; Well, the above will take a long time.  And use up a LOT of RAM.
+; More than 100 GB so far, and still going. The `featureprop` table
+; is quite large, it has 18965184 records.
 
+; Use this to count the number of records:
+(cog-incoming-size (Predicate "featureprop"))
+
+; The above count is accurate only *after* loading!
+
+; Perhaps its better to do the loading from another window. So here:
+(use-modules (opencog cogserver))
+(start-cogserver)
+
+; Then `rlwrap telnet localhost 17001` and run the load from there.
+; That way, the main guile prompt is available for monitoring progress.
+; This is the prefered way to interact, for any kind of large,
+; long-running jobs.
+
+; Here's a row-count monitor:
+(for-each
+	(lambda (PRED)
+		(format #t "Found ~A \trows in table ~A\n"
+			(cog-incoming-size-by-type PRED 'EvaluationLink)
+			(cog-name PRED)))
+	(cog-get-atoms 'PredicateNode))
+
+; Aieeee!
+;
+; The `featureloc` table is also large. -- it has 97643867 (97 million)
+; rows. Pulling in the first 32 million rows took about 100 GB of RAM.
+; Clearly, loading all of it requires more RAM, or a much more compact
+; representation.
+
+: Time to say goodnight.
 ; Close the connection to storage.
 (cog-close flystore)
 
