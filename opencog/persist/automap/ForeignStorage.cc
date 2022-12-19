@@ -107,7 +107,7 @@ printf("Connected to Postgres server version %d\n", _server_version);
 
 void ForeignStorage::close(void)
 {
-	if (_is_open) return;
+	if (not _is_open) return;
 
 	close_conn_pool();
 	_is_open = false;
