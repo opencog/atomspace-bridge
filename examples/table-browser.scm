@@ -23,6 +23,19 @@
 (define table-descs (cog-foreign-load-tables flystore))
 (format #t "Loaded ~A table descriptions\n" (length table-descs))
 
+;; ---------------------------------------------------
+
+(define (print-table PRED)
+	(define siggy (car (cog-incoming-by-type PRED 'Signature)))
+	(define varli (cog-value-ref siggy 1))
+	(format #t "Table >>~A<< columns:\n" (cog-name PRED))
+	(for-each (lambda (TYVAR)
+		(format #t "   ~A \ttype: ~A\n"
+			(cog-name (cog-value-ref TYVAR 0))
+			(cog-name (cog-value-ref TYVAR 1))))
+		(cog-outgoing-set varli)))
+
+;; ---------------------------------------------------
 (define (table-select)
 	(format #t "Select a table to load. Enter '?' to get a list of tables:\n")
 	(define tbl-str (get-line (current-input-port)))
@@ -48,6 +61,7 @@
 	(format #t "Loading ~A. This might take a few minutes; please be patient!\n" tbl-str)
 	(fetch-incoming-set tablename)
 	(format #t "Loaded ~A in ~A seconds\n" tbl-str (- (current-time) start))
+	(print-table tablename)
 	))))))
 
 (table-select)
