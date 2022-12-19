@@ -262,8 +262,26 @@ Handle ForeignStorage::load_row(const Handle& entry,     // Concept or Number
                                 const Handle& colname,   // VariableNode
                                 const Handle& tablename) // PredicateNode
 {
-	//for
+	if (not colname->is_type(VARIABLE_NODE))
+		throw RuntimeException(TRACE_INFO,
+			"Error: expecting the column name to be a VariableNode.\n");
 
+	HandleSeq colds(colname->getIncomingSetByType(TYPED_VARIABLE_LINK));
+	for (const Handle& coldesc : colds)
+		load_one_row(entry, coldesc, tablename);
+
+	// As a sop to the user, we're going to return what was found.
+	// Of course, they user could do this themselves. But, for now,
+	// we're trying to coddle them and make them feel good about this.
+	HandleSeq rows(entry->getIncomingSetByType(LIST_LINK));
+	for (const Handle& row : rows)
+	{
+		Handle maybe_this_one =
+			_atom_space->get_link(EVALUATION_LINK, tablename, row);
+		if (maybe_this_one) return maybe_this_one;
+	}
+
+	// If we are here, there was no such row. Hmm. OK, whatever.
 	return Handle::UNDEFINED;
 }
 
