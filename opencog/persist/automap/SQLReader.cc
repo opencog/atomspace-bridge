@@ -266,6 +266,42 @@ void ForeignStorage::load_join(const Handle& entry,     // Concept or Number
 	}
 }
 
+/// Given an single entry from some row in some table, find the column
+/// that it belongs to. Then join all other rows in all other tables
+/// having that same column name.
+///
+void ForeignStorage::load_joined_rows(const Handle& entry)
+{
+	// Que pasa?
+	// arow is of the form  (List (Concept "foo") (Concept "bar"))
+	// trow is (Evaluation (Predicate "table") arow)
+	// tablename is (Predicate "table")
+	// varli is (VariableList (TypedVariale ...) (TypedVariable ...))
+	//
+	// The loops below start with (Concept "bar"), find all the tables
+	// it is in (there must be at least one, or this fails) and then
+	// finds the matching (TypedVariable ...) for (Concept "bar").
+	// Recall the (TypedVariable ...) is a column descriptor.
+	// This is sent upstream, to load all other rows having the same
+	// column descriptor and entry.
+	HandleSeq anonrows(entry->getIncomingSetByType(LIST_LINK));
+	for (const Handle& arow : anonrows)
+	{
+		HandleSeq trows(arow->getIncomingSetByType(EVALUATION_LINK));
+		for (const Handle& row : trows)
+		{
+			const Handle& tablename(row->getOutgoingAtom(0));
+			const Handle& varli(get_row_desc(tablename));
+			const HandleSeq& cols(arow->getOutgoingSet());
+			for (size_t i=0; i<cols.size(); i++)
+			{
+				if (cols[i] == entry)
+					load_join(entry, varli->getOutgoingAtom(i));
+			}
+		}
+	}
+}
+
 /* ================================================================ */
 
 void ForeignStorage::getAtom(const Handle&)
