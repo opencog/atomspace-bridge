@@ -87,7 +87,7 @@ HandleSeq ForeignPersistSCM::do_load_tables(const Handle& ston)
 	return stnp->load_tables();
 }
 
-HandleSeq ForeignPersistSCM::do_load_row(const Handle& ston,
+Handle ForeignPersistSCM::do_load_row(const Handle& ston,
                                          const Handle& table,
                                          const Handle& column,
                                          const Handle& entry)

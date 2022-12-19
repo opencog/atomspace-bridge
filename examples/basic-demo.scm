@@ -111,6 +111,16 @@
 ; from session to session, and they will change if rows are added.
 
 ; ----------------------------------------------------
+; Lets do some table joins. From the above, we saw that the 42nd
+; entry has the "genotype_id" of (Number "362100"). That is, the
+; Signature showed "genotype_id" as the first column, and that
+; got printed as (Number "362100"). Lets now fetch the matching
+; rows from other tables that have this same ID. In SQL, this is
+; called a "join".
+
+(fetch-incoming-set (Number "362100"))
+
+; ----------------------------------------------------
 ; Load all data from all tables having a given column name
 (fetch-incoming-set (Variable "cell_line_id"))
 

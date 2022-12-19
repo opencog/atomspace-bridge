@@ -241,10 +241,19 @@ Handle ForeignStorage::load_one_row(const Handle& entry,     // Concept or Numbe
 	// make_select() returns `SELECT col1,col2,.. FROM tablename`
 	std::string buff = make_select(tablename);
 
-	buff += "WHERE ";
+	// Get the column name
+	buff += "WHERE " + coldesc->getOutgoingAtom(0)->get_name() + " = ";
+
+	// Strings need quotes. Numbers do not.
+	Type ct = coldesc->getOutgoingAtom(1)->get_type();
+	if (NUMBER_NODE != ct) buff += "'";
+	buff += entry->get_name();
+	if (NUMBER_NODE != ct) buff += "'";
+
+	buff += ";";
 
 printf("hey   here it is --> %s\n", buff.c_str());
-	// load_selected_rows(tablename, buff);
+	load_selected_rows(tablename, buff);
 	return Handle::UNDEFINED;
 }
 
