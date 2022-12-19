@@ -45,9 +45,10 @@
 	(format #t "Table >>~A<< columns:\n" (cog-name table))
 	(for-each
 		(lambda (TYVAR VALU)
-			(format #t "   ~A \tvalue: ~A\n"
-				(cog-name (cog-value-ref TYVAR 0))
-				(cog-name VALU)))
+			(when (not (equal? 0 (string-length (cog-name VALU))))
+				(format #t "   ~A \tvalue: ~A\n"
+					(cog-name (cog-value-ref TYVAR 0))
+					(cog-name VALU))))
 		(cog-outgoing-set varli)
 		(cog-outgoing-set naked)))
 
@@ -57,6 +58,7 @@
 (define (table-select)
 	(format #t "Enter the name of a table to load. Enter '?' to get a list of tables.\n")
 	(format #t "Caution: some tables are huge, and require dozens of GB to load.\n")
+	(format #t "Recommend table 'stock' to start with.\n")
 	(format #t "select-table> ~!")
 	(define tbl-str (get-line (current-input-port)))
 
@@ -91,6 +93,24 @@
 
 ;; ---------------------------------------------------
 
+(define (valid-col? COL ROW)
+	#f)
+
+(define (edge-walk ROW)
+	(print-row ROW)
+	(format #t "Enter a column name. Enter 'q' to return to the main prompt.\n")
+	(format #t "select-edge> ~!")
+	(define col-str (get-line (current-input-port)))
+	(cond
+		((equal? 0 (string-length col-str)) (edge-walk ROW))
+		((equal? "q" col-str) #f)
+		((valid-col? col-str ROW)
+			(format #t "rock it\n"))
+		(else (edge-walk ROW)))
+)
+
+;; ---------------------------------------------------
+
 (define (prt-commands)
 	(format #t "Available commands:\n")
 	(format #t "   exit -- quit\n")
@@ -105,7 +125,7 @@
 (define curr-rows #f)
 
 (define (browser-shell)
-	(format #t "Enter a command. Enter '?' for a list of commands\n")
+	(format #t "Enter a command. Enter '?' for a list of commands.\n")
 	(format #t "browser> ~!")
 	(define cmd-str (get-line (current-input-port)))
 	(cond
@@ -131,7 +151,7 @@
 					(format #t "This may take a few minutes for large tables\n")
 					(set! curr-rows
 						(cog-incoming-by-type (Predicate curr-table) 'Evaluation)))
-				(print-row (list-ref curr-rows (random (length curr-rows))))))
+				(edge-walk (list-ref curr-rows (random (length curr-rows))))))
 
 		(else
 			(format #t "Unknown command ~A\n" cmd-str)))
