@@ -23,6 +23,7 @@
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-foreign))
 
+; ----------------------------------------------------
 ; Declare the location of the database.
 ; If the DB is on the local machine, must use three slashes;
 ; for a remote DB, use one of these URL's:
@@ -60,13 +61,56 @@
 ; Take a look at the connection status
 (display (monitor-storage flystore))
 
-; Load all data from one table.
-(fetch-incoming-set (Predicate "cell_line"))
+; ----------------------------------------------------
+; Lets explore some tables. Start with a known column name,
+; say "genotype_id". Column names are written as VariableNodes
+; Print the type of the column (the "column descriptor")
+(cog-incoming-set (Variable "genotype_id"))
+
+; Create a list of all the tables that this column appears in.
+; We'll use a short scheme function to grab this. It just walks
+; upwards from the column name, to the column descriptor, to the
+; row descriptor, to each table descriptor that the column appears in.
+;
+(define (get-tables NAME)
+	(define column (Variable NAME))
+	(define coldesc (car (cog-incoming-by-type column 'TypedVariable)))
+	(define rowdescs (cog-incoming-by-type coldesc 'VariableList))
+	(map
+		(lambda (ROWDESC)
+			(define siggy (car (cog-incoming-by-type ROWDESC 'Signature)))
+			(cog-value-ref siggy 0))
+		rowdescs))
+
+; Do it. Print them out.
+(get-tables "genotype_id")
+
+; ----------------------------------------------------
+; Pick a table, any table. Load all data from that table.
+; The genotype table is medium-sized, it contains about
+; half-a-million entries.
+(fetch-incoming-set (Predicate "genotype"))
 
 ; What have we found so far?
 (cog-report-counts)   ; Reports number of Atoms, by type.
+(count-all)           ; Grand-total number of Atoms in the AtomSpace
 (display (monitor-storage flystore))
 
+; Before we look at any rows in that table, lets take a look at
+; the table description. This will give us a hint of what we're
+; going to see next.
+(cog-incoming-by-type (Predicate "genotype") 'Signature)
+
+; Take a look at the 42nd row in the table.
+(list-ref (cog-incoming-set (Predicate "genotype")) 42)
+
+; The above is a bit sloppy: it first gets all half-a-million rows,
+; and then picks the 42nd one. So it takes a second to do this.
+; No matter; we're just sampling to see whats going on.
+; BTW, these "row numbers" are not reproducible; they will change
+; from session to session, and they will change if rows are added.
+
+; ----------------------------------------------------
 ; Load all data from all tables having a given column name
 (fetch-incoming-set (Variable "cell_line_id"))
 

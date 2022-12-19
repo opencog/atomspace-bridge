@@ -9,14 +9,28 @@
 (use-modules (opencog fdi-config))
 (load-extension (string-append opencog-ext-path-persist-fdi "libpersist-fdi") "opencog_persist_fdi_init")
 
-(export cog-foreign-load-tables)
+(export cog-foreign-load-tables cog-foreign-load-row)
 
 (set-procedure-property! cog-foreign-load-tables 'documentation
 "
   cog-foreign-load-tables STORAGE - Load table definitions
 
-  Optionally specify the schema from which to load the tables
+  Optionally specify the SQL schema name from which to load the tables.
   (not implemeneted)
+")
+
+(set-procedure-property! cog-foreign-load-row 'documentation
+"
+  cog-foreign-load-row STORAGE TABLE COLUMN ITEM - Load row containing ITEM
+
+  The ITEM is assumed to be some entry located in COLUMN in TABLE.
+
+  Example:
+    (cog-foreign-load-row
+        (ForeignStorage "postgres:///flybase")
+        (Predicate "featureloc")
+        (Variable "genotype_id")
+
 ")
 
 ;;;(set-procedure-property! sql-open 'documentation
