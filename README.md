@@ -22,8 +22,9 @@ At this time, it supports Postgres only.
 
 Status
 ------
-***Version 0.0.3*** -- Mostly a collection of design notes. Initial
-boilerplate to connect to Postgres.
+***Version 0.1.0*** -- A collection of design notes. An implementation
+that can load table descriptions and table contents from Postgres DB's.
+Provides just enough to be basically usable, with no fancy features.
 
 History
 -------

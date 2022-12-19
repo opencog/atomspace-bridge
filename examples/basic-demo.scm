@@ -1,5 +1,5 @@
 ;
-; bringup-demo.scm - Crude script used for development debugging.
+; basic-demo.scm - Basic demo of the most basic features.
 ;
 ; Step 0: Install and configure Postgres.
 ;
@@ -55,4 +55,37 @@
 ; Load all data from all tables having a given column name
 (fetch-incoming-set (Variable "cell_line_id"))
 
+; What have we found so far?
+(cog-report-counts)
+(display (monitor-storage flystore))
+
+; So far, all we've done above is to load data. Lets do some simple
+; exploring. Here's some gene:  (Concept "S2R+-Gmap-GFP-7") Lets
+; look at all the rows that it's in.
+(cog-get-root (Concept "S2R+-Gmap-GFP-7"))
+
+; This should print out
+; ((Evaluation (Predicate "cell_line")
+;    (List (Number "273") (Concept "S2R+-Gmap-GFP-7")
+;          (Concept "FBtc0000277") (Number "1") (Number "0"))))
+; which is pretty meaningless without a table schema.  What's the
+; schema?
+
+(cog-incoming-by-type (Predicate "cell_line") 'Signature)
+
+; So we see that its this:
+; ((Signature (Predicate "cell_line")
+;    (VariableList
+;     (TypedVariable (Variable "cell_line_id") (Type "NumberNode"))
+;     (TypedVariable (Variable "name") (Type "ConceptNode"))
+;     (TypedVariable (Variable "uniquename") (Type "ConceptNode"))
+;     (TypedVariable (Variable "organism_id") (Type "NumberNode"))
+;     (TypedVariable (Variable "is_obsolete") (Type "NumberNode")))))
+;
+; We conclude that (Concept "S2R+-Gmap-GFP-7") lies in a column
+; called "name". Woo hoo! Such information!
+
+; Close the connection to storage.
 (cog-close flystore)
+
+; The End! That's all folks!
