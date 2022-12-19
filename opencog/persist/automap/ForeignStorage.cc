@@ -165,7 +165,8 @@ std::string ForeignStorage::monitor(void)
 	}
 
 	rs += "Connected to: " + _name + "\n";
-	rs += "Posgres server version: " + _server_version + "\n";
+	rs += "Posgres server version: " + _server_version;
+	rs += "\n";
 	rs += "Number of queries issued: " + std::to_string(_num_queries) + "\n";
 	rs += "Number of loaded tables: " + std::to_string(_num_tables) + "\n";
 	rs += "Number of rows loaded: " + std::to_string(_num_rows) + "\n";

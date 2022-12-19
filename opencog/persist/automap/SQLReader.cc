@@ -85,7 +85,7 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	Handle tabc = _atom_space->add_link(VARIABLE_LIST, std::move(tcols));
 	Handle tabn = _atom_space->add_node(PREDICATE_NODE, std::string(tablename));
 	Handle tabs = _atom_space->add_link(SIGNATURE_LINK, tabn, tabc);
-	printf("============= Loaded table ==>%s<==\n", tablename.c_str());
+	// printf("============= Loaded table ==>%s<==\n", tablename.c_str());
 
 	return tabs;
 }
@@ -107,7 +107,7 @@ void ForeignStorage::load_tables(void)
 
 	_num_tables = tabnames.size();
 	_num_rows += _num_tables;
-printf("duude found %lu tables\n", _num_tables);
+	printf("Found %lu tables\n", _num_tables);
 	for (const std::string& tn : tabnames)
 		load_one_table(tn);
 }
@@ -118,6 +118,10 @@ printf("duude found %lu tables\n", _num_tables);
 void ForeignStorage::load_table_data(const Handle& hp)
 {
 	_num_queries++;
+
+	if (not hp->is_type(PREDICATE_NODE))
+		throw RuntimeException(TRACE_INFO,
+			"Internal error, expecting a predicate\n");
 
 	// We are expecting this:
 	//   Signature
@@ -157,9 +161,30 @@ void ForeignStorage::load_table_data(const Handle& hp)
 	rp.pred = hp;
 	rp.cols = listl->getOutgoingSet();
 	rp.rs->foreach_row(&Response::tabledata_cb, &rp);
-	_num_rows += rp.nrows
+	_num_rows += rp.nrows;
 }
 
+/* ================================================================ */
+
+/// Load all rows in all tables holding this column name.
+void ForeignStorage::load_column(const Handle& hv)
+{
+	// Starting at the variable, walk upwards, searching for
+	// Signatures holding this column.
+	HandleSeq typed_vars = hv->getIncomingSetByType(TYPED_VARIABLE_LINK);
+	for (const Handle& tvar : typed_vars)
+	{
+		HandleSeq varlists = tvar->getIncomingSetByType(VARIABLE_LIST);
+		for (const Handle& varli: varlists)
+		{
+			HandleSeq sigs = varli->getIncomingSetByType(SIGNATURE_LINK);
+			for (const Handle& sig: sigs)
+			{
+				load_table_data(sig->getOutgoingAtom(0));
+			}
+		}
+	}
+}
 
 /* ================================================================ */
 
@@ -184,6 +209,12 @@ void ForeignStorage::fetchIncomingSet(AtomSpace* as, const Handle& h)
 
 	if (h->is_type(PREDICATE_NODE))
 		load_table_data(h);
+	else
+	if (h->is_type(VARIABLE_NODE))
+		load_column(h);
+	else
+		throw RuntimeException(TRACE_INFO,
+			"Not supported. Try loading a predicate or variable.\n");
 }
 
 void ForeignStorage::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
