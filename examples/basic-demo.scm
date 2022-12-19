@@ -44,7 +44,7 @@
 ; Load all of the table definitions.
 (define table-descs (cog-foreign-load-tables flystore))
 
-; How many table deescriptions were loaded?
+; How many table descriptions were loaded?
 (length table-descs)
 
 ; Take a quick peek at the third table description. This will print
