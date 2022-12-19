@@ -5,18 +5,33 @@
 ; See the basic-demo.scm for instructions.
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 textual-ports))
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-foreign))
 
-#! ---------
-; ----------------------------------------------------
-; Declare the location of the database.
-;
-(define flystore (ForeignStorageNode "postgres:///flybase"))
-(cog-open flystore)
+(format #t "SQL Table Browser Demo\n\n")
+(format #t "Enter a Postgres DB to open:\n")
+(format #t "   For example, \"postgres:///flybase\"\n")
 
+(define db-str (get-line (current-input-port)))
+(if (equal? 0 (string-length db-str))
+	(set! db-str "postgres:///flybase"))
+
+(define flystore (ForeignStorageNode db-str))
+(format #t "Opening ~A\n" flystore)
+(cog-open flystore)
 (define table-descs (cog-foreign-load-tables flystore))
 (format #t "Loaded ~A table descriptions\n" (length table-descs))
+
+
+(define (browser-shell)
+	(define inp (get-line (current-input-port)))
+	(format #t "yo ~A\n" inp)
+	(browser-shell))
+
+(browser-shell)
+
+#! ---------
 
 (define (print-tables NAME)
 	(define column (Variable NAME))
