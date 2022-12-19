@@ -59,9 +59,7 @@ Primary and Foreign Keys
 The primary mapping problem is what to do with primary and foreign keys.
 The simplest solution is to "do nothing" and let the user just wing it.
 That is, to join tables together, the user would write Atomese queries
-using the [IdenticalLink](https://wiki.opencog.org/w/IdenticalLink)
-to trace between two different predicates (aka tables). This works and
-is surprisingly flexible.
+that include the key to be joined.  This works and is surprisingly flexible.
 
 Other mappings are possible; however, there is no natural way of asking
 Postgres which table columns are foreign keys, and which other tables
@@ -90,8 +88,17 @@ See the OpenCog wiki:
 * [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink)
 * [PredicateNode](https://wiki.opencog.org/w/PredicateNode)
 
-For just right now, we punt, and store indexes in the AtomSpace.
-Its simple and easy. It wastes some RAM, but so what.
+From what I can tell, the above uses about the same amount of RAM as
+having explicit keys in each row. It also takes just about the same
+amount of time to query over. So it does not seem to offer any size
+or performance advantage over brute-force primary/foreign keys.
+
+What it does do is provide a lot more flexibility: you can create and
+destroy joins at any time. You can join some rows but not others. All
+the usual stuff that makes the AtomSpace much more flexible than SQL.
+
+For just right now, we punt, and store the naked PRIMARY/FOREIGN KEY
+values as Atoms in the AtomSpace. It's klunky but it works.
 
 Table Schemas
 -------------
