@@ -118,42 +118,51 @@ void ForeignStorage::load_tables(void)
 
 /* ================================================================ */
 
-/// Create a SELECT statement for the given table.
-/// If will have the general form
-///    SELECT clo1, col2, ... FROM tablename
-/// with the column names take from the table signature.
-std::string ForeignStorage::make_select(const Handle& tablename)
+/// Obtain and return the VariableList from a Signature for a table.
+///
+/// We are expecting this structure to be available:
+///
+///   Signature
+///       Predicate "some table"  <-- this is given tablename
+///       VariableList            <-- this is what we return.
+///           TypedVariable
+///               Variable "column name"
+///               Type 'AtomType
+///           ...
+///
+/// There should be one and only one such structure in RAM.
+///
+Handle ForeignStorage::get_row_desc(const Handle& tablename)
 {
 	if (not tablename->is_type(PREDICATE_NODE))
 		throw RuntimeException(TRACE_INFO,
-			"Internal error, expecting a Predicate\n");
+			"Internal error, expecting the table name to be a Predicate\n");
 
-	// We are expecting this:
-	//   Signature
-	//       Predicate "some table"  <-- this is tablename above
-	//       List
-	//           TypedVariable
-	//               Variable "column name"
-	//               Type 'AtomType
-	//           ...
 	HandleSeq sigs = tablename->getIncomingSetByType(SIGNATURE_LINK);
 	if (1 != sigs.size())
 		throw RuntimeException(TRACE_INFO,
 			"Cannot find signature for %s\n",
 			tablename->to_short_string().c_str());
 
+	return sigs[0]->getOutgoingAtom(1);
+}
+
+/// Create a SELECT statement for the given table.
+/// If will have the general form
+///    SELECT clo1, col2, ... FROM tablename
+/// with the column names take from the table signature.
+std::string ForeignStorage::make_select(const Handle& tablename)
+{
 	std::string buff = "SELECT ";
 
 	// listl will be a VariableList; tvl will be a TypedVariableLink
-	// We build up a list of column names, based on what we already
-	// know about the table.
-	Handle listl = sigs[0]->getOutgoingAtom(1);
+	// We build up a SQL string list of column names, based on the
+	// table signature.
+	Handle listl(get_row_desc(tablename));
 	for (const Handle& tvl : listl->getOutgoingSet())
-	{
-		buff += tvl->getOutgoingAtom(0)->get_name();
-		buff += ", ";
-	}
+		buff += tvl->getOutgoingAtom(0)->get_name() + ", ";
 
+	// Trim the trailing comma
 	buff.pop_back();
 	buff.pop_back();
 	buff += " FROM " + tablename->get_name() + " ";
@@ -163,7 +172,9 @@ std::string ForeignStorage::make_select(const Handle& tablename)
 
 /* ================================================================ */
 
-/// Load all rows in the table identified by the predicate.
+/// Load all rows in the table identified by the tablename.
+/// tablename must be a PredicateNode holding the name of an SQL table,
+/// and the signature of that table must already be known (loaded).
 void ForeignStorage::load_table_data(const Handle& tablename)
 {
 	_num_queries++;
@@ -173,8 +184,8 @@ void ForeignStorage::load_table_data(const Handle& tablename)
 
 	rp.nrows = 0;
 	rp.as = _atom_space;
-	rp.pred = hp;
-	rp.cols = listl->getOutgoingSet();
+	rp.pred = tablename;
+	rp.cols = get_row_desc(tablename)->getOutgoingSet();
 	rp.rs->foreach_row(&Response::tabledata_cb, &rp);
 	_num_rows += rp.nrows;
 }
@@ -211,7 +222,7 @@ void ForeignStorage::load_row(const Handle& entry,     // Concept or Number
 {
 	_num_queries++;
 
-	if (not column->is_type(TYPED_VARIABLE))
+	if (not colname->is_type(TYPED_VARIABLE_LINK))
 		throw RuntimeException(TRACE_INFO,
 			"Internal error, expecting a TypedVariable\n");
 

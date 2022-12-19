@@ -70,6 +70,7 @@ class ForeignStorage : public StorageNode
 
 		// Loading of table defintions
 		Handle load_one_table(const std::string&);
+		Handle get_row_desc(const Handle&);
 		std::string make_select(const Handle&);
 		void load_table_data(const Handle&);
 		void load_column(const Handle&);
