@@ -75,7 +75,7 @@ class ForeignStorage : public StorageNode
 		void load_selected_rows(const Handle&, const std::string&);
 		void load_table_data(const Handle&);
 		void load_column(const Handle&);
-		Handle load_one_row(const Handle&, const Handle&, const Handle&);
+		void load_one_row(const Handle&, const Handle&, const Handle&);
 		void load_join(const Handle&, const Handle&);
 		void load_joined_rows(const Handle&);
 

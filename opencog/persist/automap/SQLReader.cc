@@ -234,9 +234,9 @@ void ForeignStorage::load_column(const Handle& hv)
 
 /// Load a single row fom a single table, given just an entry in
 /// that row, a column descriptor for the entry, and the table name.
-Handle ForeignStorage::load_one_row(const Handle& entry,     // Concept or Number
-                                    const Handle& coldesc,   // TypedVariable
-                                    const Handle& tablename) // PredicateNode
+void ForeignStorage::load_one_row(const Handle& entry,     // Concept or Number
+                                  const Handle& coldesc,   // TypedVariable
+                                  const Handle& tablename) // PredicateNode
 {
 	// make_select() returns `SELECT col1,col2,.. FROM tablename`
 	std::string buff = make_select(tablename);
@@ -249,12 +249,9 @@ Handle ForeignStorage::load_one_row(const Handle& entry,     // Concept or Numbe
 	if (NUMBER_NODE != ct) buff += "'";
 	buff += entry->get_name();
 	if (NUMBER_NODE != ct) buff += "'";
-
 	buff += ";";
 
-printf("hey   here it is --> %s\n", buff.c_str());
 	load_selected_rows(tablename, buff);
-	return Handle::UNDEFINED;
 }
 
 /// Load a single row fom a single table, given just an entry in
@@ -267,6 +264,7 @@ Handle ForeignStorage::load_row(const Handle& entry,     // Concept or Number
 {
 	//for
 
+	return Handle::UNDEFINED;
 }
 
 /* ================================================================ */
@@ -279,19 +277,19 @@ Handle ForeignStorage::load_row(const Handle& entry,     // Concept or Number
 /// or a PRIMARY KEY in some tables somewhere. We join *everything* with
 /// that key, and load it into the AtomSpace.
 void ForeignStorage::load_join(const Handle& entry,     // Concept or Number
-                               const Handle& colname)   // TypedVariable
+                               const Handle& coldesc)   // TypedVariable
 {
-	if (not colname->is_type(TYPED_VARIABLE_LINK))
+	if (not coldesc->is_type(TYPED_VARIABLE_LINK))
 		throw RuntimeException(TRACE_INFO,
-			"Internal error, expecting a TypedVariable\n");
+			"Internal error, expecting a column description as a TypedVariable\n");
 
-	HandleSeq vlists(colname->getIncomingSetByType(VARIABLE_LIST));
+	HandleSeq vlists(coldesc->getIncomingSetByType(VARIABLE_LIST));
 	for (const Handle& varli : vlists)
 	{
 		HandleSeq sigs(varli->getIncomingSetByType(SIGNATURE_LINK));
 		for (const Handle& sig : sigs)
 		{
-			load_row(entry, colname, sig->getOutgoingAtom(0));
+			load_one_row(entry, coldesc, sig->getOutgoingAtom(0));
 		}
 	}
 }

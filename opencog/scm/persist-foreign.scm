@@ -27,10 +27,10 @@
 
   Example:
     (cog-foreign-load-row
-        (ForeignStorage "postgres:///flybase")
-        (Predicate "featureloc")
-        (Variable "genotype_id")
-
+        (ForeignStorage \"postgres:///flybase\")
+        (Predicate \"genotype\")
+        (Variable \"genotype_id\")
+        (Number 362100))
 ")
 
 ;;;(set-procedure-property! sql-open 'documentation

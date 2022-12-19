@@ -118,7 +118,12 @@
 ; rows from other tables that have this same ID. In SQL, this is
 ; called a "join".
 
-(fetch-incoming-set (Number "362100"))
+; Note, by the way, that this won't work if there hasn't been at
+; least one row from one table loaded, having this column. That's
+; because a number, pulled out of thin air, doesn't have enough
+; info on it to know where it belongs, what it's associated with.
+
+(fetch-incoming-set (Number 362100))
 
 ; ----------------------------------------------------
 ; Load all data from all tables having a given column name
