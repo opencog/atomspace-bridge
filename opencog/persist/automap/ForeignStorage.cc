@@ -3,7 +3,7 @@
  * opencog/persist/automap/ForeignStorage.cc
  *
  * FUNCTION:
- * Foreign SQL to AtomSpace interaces.
+ * Foreign SQL to AtomSpace interfaces.
  *
  * HISTORY:
  * Copyright (c) 2022 Linas Vepstas <linasvepstas@gmail.com>

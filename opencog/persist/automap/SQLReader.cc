@@ -3,7 +3,7 @@
  * opencog/persist/automap/SQLReader.cc
  *
  * FUNCTION:
- * Foreign SQL to AtomSpace interaces.
+ * Foreign SQL to AtomSpace interfaces.
  *
  * HISTORY:
  * Copyright (c) 2022 Linas Vepstas <linasvepstas@gmail.com>
@@ -103,7 +103,7 @@ HandleSeq ForeignStorage::load_tables(void)
 	_num_queries++;
 	Response rp(conn_pool);
 	// This fetches everything except the postgres tables.
-	// Unfortunately, it fetchs view and other non-table things.
+	// Unfortunately, it fetches view and other non-table things.
 	// rp.exec("SELECT tablename FROM pg_tables WHERE schemaname != 'pg_catalog';");
 
 	// This seems like the correct hack-of-the-moment.

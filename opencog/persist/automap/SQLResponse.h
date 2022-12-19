@@ -198,7 +198,7 @@ class ForeignStorage::Response
 					tcol = nullptr;
 				}
 				else
-					printf("duuuude unknow coltype >>%s<<\n", colvalue);
+					printf("duuuude unknown coltype >>%s<<\n", colvalue);
 			}
 			return false;
 		}

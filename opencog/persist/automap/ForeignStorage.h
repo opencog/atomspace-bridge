@@ -68,7 +68,7 @@ class ForeignStorage : public StorageNode
 		size_t _num_tables;
 		size_t _num_rows;
 
-		// Loading of table defintions
+		// Loading of table definitions
 		Handle load_one_table(const std::string&);
 		Handle get_row_desc(const Handle&);
 		std::string make_select(const Handle&);
