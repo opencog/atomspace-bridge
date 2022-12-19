@@ -47,6 +47,7 @@ public:
 	~ForeignPersistSCM();
 
 	HandleSeq do_load_tables(const Handle&);
+	Handle do_load_row(const Handle&, const Handle&, const Handle&, const Handle&);
 
 }; // class
 

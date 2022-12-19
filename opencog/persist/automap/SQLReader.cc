@@ -233,10 +233,10 @@ void ForeignStorage::load_column(const Handle& hv)
 /* ================================================================ */
 
 /// Load a single row fom a single table, given just an entry in
-/// that row, an ID for the row, and the table name.
-void ForeignStorage::load_row(const Handle& entry,     // Concept or Number
-                              const Handle& colname,   // TypedVariable
-                              const Handle& tablename) // PredicateNode
+/// that row, a column descriptor for the entry, and the table name.
+Handle ForeignStorage::load_one_row(const Handle& entry,     // Concept or Number
+                                    const Handle& coldesc,   // TypedVariable
+                                    const Handle& tablename) // PredicateNode
 {
 	// make_select() returns `SELECT col1,col2,.. FROM tablename`
 	std::string buff = make_select(tablename);
@@ -245,6 +245,19 @@ void ForeignStorage::load_row(const Handle& entry,     // Concept or Number
 
 printf("hey   here it is --> %s\n", buff.c_str());
 	// load_selected_rows(tablename, buff);
+	return Handle::UNDEFINED;
+}
+
+/// Load a single row fom a single table, given just an entry in
+/// that row, a column name for that entry, and the table name.
+/// Converts the column name into a column descriptor and calls the
+/// function above.
+Handle ForeignStorage::load_row(const Handle& entry,     // Concept or Number
+                                const Handle& colname,   // VariableNode
+                                const Handle& tablename) // PredicateNode
+{
+	//for
+
 }
 
 /* ================================================================ */

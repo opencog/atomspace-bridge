@@ -48,7 +48,8 @@
 
 ; Take a quick peek at the third table description. This will print
 ; a mess, but hopefully, it will be obvious: the name of the table,
-; a list of the rows in the table, and the type of each row.
+; followed by the a list of the column descriptors. Each column consists
+; of the column name (the Variable) and the type of the column.
 ; (Why third? no reason, just for fun.)
 (third table-descs)
 

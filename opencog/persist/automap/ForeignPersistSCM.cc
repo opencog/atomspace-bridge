@@ -66,22 +66,34 @@ void ForeignPersistSCM::init(void)
 {
 	define_scheme_primitive("cog-foreign-load-tables",
 		&ForeignPersistSCM::do_load_tables, this, "persist-foreign");
+	define_scheme_primitive("cog-foreign-load-row",
+		&ForeignPersistSCM::do_load_row, this, "persist-foreign");
 }
 
 ForeignPersistSCM::~ForeignPersistSCM()
 {
 }
 
-HandleSeq ForeignPersistSCM::do_load_tables(const Handle& ston)
-{
-	ForeignStorageNodePtr stnp = ForeignStorageNodeCast(ston);
-
-	if (nullptr == stnp)
-		throw RuntimeException(TRACE_INFO,
-			"cog-foreign-load-tables: Error: Bad StorageNode! Got %s",
+#define GET_STNP(FUNC) \
+	ForeignStorageNodePtr stnp = ForeignStorageNodeCast(ston); \
+	if (nullptr == stnp) \
+		throw RuntimeException(TRACE_INFO, \
+			FUNC ": Error: Bad StorageNode! Got %s", \
 			ston->to_short_string().c_str());
 
+HandleSeq ForeignPersistSCM::do_load_tables(const Handle& ston)
+{
+	GET_STNP("cog-foreign-load-tables");
 	return stnp->load_tables();
+}
+
+HandleSeq ForeignPersistSCM::do_load_row(const Handle& ston,
+                                         const Handle& table,
+                                         const Handle& column,
+                                         const Handle& entry)
+{
+	GET_STNP("cog-foreign-load-row");
+	return stnp->load_row(table, column, entry);
 }
 
 void opencog_persist_fdi_init(void)
