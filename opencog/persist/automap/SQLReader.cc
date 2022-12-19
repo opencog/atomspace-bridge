@@ -118,28 +118,29 @@ void ForeignStorage::load_tables(void)
 
 /* ================================================================ */
 
-/// Load all rows in the table identified by the predicate.
-void ForeignStorage::load_table_data(const Handle& hp)
+/// Create a SELECT statement for the given table.
+/// If will have the general form
+///    SELECT clo1, col2, ... FROM tablename
+/// with the column names take from the table signature.
+std::string ForeignStorage::make_select(const Handle& tablename)
 {
-	_num_queries++;
-
-	if (not hp->is_type(PREDICATE_NODE))
+	if (not tablename->is_type(PREDICATE_NODE))
 		throw RuntimeException(TRACE_INFO,
-			"Internal error, expecting a predicate\n");
+			"Internal error, expecting a Predicate\n");
 
 	// We are expecting this:
 	//   Signature
-	//       Predicate "some table"  <-- this is hp above
+	//       Predicate "some table"  <-- this is tablename above
 	//       List
 	//           TypedVariable
 	//               Variable "column name"
 	//               Type 'AtomType
 	//           ...
-	HandleSeq sigs = hp->getIncomingSetByType(SIGNATURE_LINK);
+	HandleSeq sigs = tablename->getIncomingSetByType(SIGNATURE_LINK);
 	if (1 != sigs.size())
 		throw RuntimeException(TRACE_INFO,
 			"Cannot find signature for %s\n",
-			hp->to_short_string().c_str());
+			tablename->to_short_string().c_str());
 
 	std::string buff = "SELECT ";
 
@@ -155,10 +156,20 @@ void ForeignStorage::load_table_data(const Handle& hp)
 
 	buff.pop_back();
 	buff.pop_back();
-	buff += " FROM " + hp->get_name() + ";";
+	buff += " FROM " + tablename->get_name() + " ";
+
+	return buff;
+}
+
+/* ================================================================ */
+
+/// Load all rows in the table identified by the predicate.
+void ForeignStorage::load_table_data(const Handle& tablename)
+{
+	_num_queries++;
 
 	Response rp(conn_pool);
-	rp.exec(buff);
+	rp.exec(make_select(tablename) + ";");
 
 	rp.nrows = 0;
 	rp.as = _atom_space;
@@ -188,6 +199,34 @@ void ForeignStorage::load_column(const Handle& hv)
 			}
 		}
 	}
+}
+
+/* ================================================================ */
+
+/// Load a single row fom a single table, given just an entry in
+/// that row, an ID for the row, and the table name.
+void ForeignStorage::load_row(const Handle& entry,     // Concept or Number
+                              const Handle& colname,   // TypedVariable
+                              const Handle& tablename) // PredicateNode
+{
+	_num_queries++;
+
+	if (not column->is_type(TYPED_VARIABLE))
+		throw RuntimeException(TRACE_INFO,
+			"Internal error, expecting a TypedVariable\n");
+
+	if (not tablename->is_type(PREDICATE_NODE))
+		throw RuntimeException(TRACE_INFO,
+			"Internal error, expecting a Predicate\n");
+
+	std::string buff = make_select(tablename);
+}
+
+/* ================================================================ */
+
+/// Load rows from tables that have the same column name
+void ForeignStorage::load_rows(const Handle& hv)
+{
 }
 
 /* ================================================================ */
