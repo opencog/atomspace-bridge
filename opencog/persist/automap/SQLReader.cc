@@ -72,6 +72,10 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	rp.tentries = &tcols;
 	rp.rs->foreach_row(&Response::tabledesc_cb, &rp);
 
+	if (0 == tcols.size())
+		throw RuntimeException(TRACE_INFO,
+			"Error: can't find a table description for %s", tablename.c_str());
+
 	// Create a signature of the general form:
 	//
 	//    Signature
@@ -90,7 +94,7 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	return tabs;
 }
 
-void ForeignStorage::load_tables(void)
+HandleSeq ForeignStorage::load_tables(void)
 {
 	if (not _is_open)
 		throw RuntimeException(TRACE_INFO,
@@ -111,9 +115,13 @@ void ForeignStorage::load_tables(void)
 
 	_num_tables = tabnames.size();
 	_num_rows += _num_tables;
-	printf("Found %lu tables\n", _num_tables);
+	// printf("Found %lu tables\n", _num_tables);
+
+	HandleSeq tabs;
 	for (const std::string& tn : tabnames)
-		load_one_table(tn);
+		tabs.emplace_back(load_one_table(tn));
+
+	return tabs;
 }
 
 /* ================================================================ */
@@ -317,17 +325,20 @@ void ForeignStorage::fetchIncomingSet(AtomSpace* as, const Handle& h)
 {
 	// Multiple different cases are to be handled:
 	// 1) h is a PredicateNode, and so we assume it is the name of a table.
-	// 2) h is a VariableNode or TypedVariable, so we assume it names
-	//    a solumn in one or more tables.
-	// 3) h is a ConceptNode; we assume it's some in some row of some
-	//    table.
-	// 4) h is a NumberNode; we assume it's a primary/foreign key.
+	// 2) h is a VariableNode or TypedVariable, so we assume it is a
+	//    column descriptor for one or more tables.
+	// 3) h is a ConceptNode or NumberNode; we assume it's some primary or
+	//    foreign key in some other tables. Load all of those rows in all
+	//    of those tables.
 
 	if (h->is_type(PREDICATE_NODE))
 		load_table_data(h);
 	else
 	if (h->is_type(VARIABLE_NODE))
 		load_column(h);
+	else
+	if (h->is_type(CONCEPT_NODE) or h->is_type(NUMBER_NODE))
+		load_joined_rows(h);
 	else
 		throw RuntimeException(TRACE_INFO,
 			"Not supported. Try loading a predicate or variable.\n");

@@ -119,7 +119,7 @@ class ForeignStorage : public StorageNode
 		void clear_stats(void); // reset stats counters.
 
 		// Extra functions
-		void load_tables(void);
+		HandleSeq load_tables(void);
 };
 
 class ForeignStorageNode : public ForeignStorage

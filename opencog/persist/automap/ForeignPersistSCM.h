@@ -46,7 +46,7 @@ public:
 	ForeignPersistSCM(AtomSpace*);
 	~ForeignPersistSCM();
 
-	void do_load_tables(const Handle&);
+	HandleSeq do_load_tables(const Handle&);
 
 }; // class
 

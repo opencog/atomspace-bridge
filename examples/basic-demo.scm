@@ -19,6 +19,7 @@
 ;         the commands below. Observe, make sure they work.
 ;
 
+(use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-foreign))
 
@@ -39,8 +40,17 @@
 
 (cog-connected? flystore)
 
-; Load all of the table defintions.
-(cog-foreign-load-tables flystore)
+; Load all of the table definitions.
+(define table-descs (cog-foreign-load-tables flystore))
+
+; How many table deescriptions were loaded?
+(length table-descs)
+
+; Take a quick peek at the third table description. This will print
+; a mess, but hopefully, it will be obvious: the name of the table,
+; a list of the rows in the table, and the type of each row.
+; (Why third? no reason, just for fun.)
+(third table-descs)
 
 ; What is in the AtomSpace so far?
 (cog-prt-atomspace)

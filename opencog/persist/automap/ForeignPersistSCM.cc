@@ -72,7 +72,7 @@ ForeignPersistSCM::~ForeignPersistSCM()
 {
 }
 
-void ForeignPersistSCM::do_load_tables(const Handle& ston)
+HandleSeq ForeignPersistSCM::do_load_tables(const Handle& ston)
 {
 	ForeignStorageNodePtr stnp = ForeignStorageNodeCast(ston);
 
@@ -81,7 +81,7 @@ void ForeignPersistSCM::do_load_tables(const Handle& ston)
 			"cog-foreign-load-tables: Error: Bad StorageNode! Got %s",
 			ston->to_short_string().c_str());
 
-	stnp->load_tables();
+	return stnp->load_tables();
 }
 
 void opencog_persist_fdi_init(void)
