@@ -134,16 +134,16 @@
 ;; ---------------------------------------------------
 ;
 ; Given a selected table (as string) and a selected column (as string)
-; and a value for that column, load a row in that table, having this
-; value for this column.  If there are no such rows, return #f.
-(define (load-join TBL-STR COL-STR VALU)
+; and a value for that column, load all rows in that table, having this
+; value for this column.  If there are no such rows, return '().
+(define (load-joins TBL-STR COL-STR VALU)
 	(define table (cog-node 'Predicate TBL-STR))
 	(define vardecl (get-vardecl COL-STR))
 
 	; Load if from SQL. For example:
-	;    (cog-foreign-load-row flystore
+	;    (cog-foreign-load-rows flystore
 	;        (Predicate "genotype") (Variable "genotype_id") (Number 464522))
-	(cog-foreign-load-row flystore table (gar vardecl) VALU)
+	(cog-foreign-load-rows flystore table (gar vardecl) VALU)
 )
 
 ;; ---------------------------------------------------
@@ -153,20 +153,26 @@
 ; value for this column.  Then bounce to the edge secletion menu again.
 (define (join-walk TBL-STR COL-STR VALU)
 
-	(define new-row (load-join TBL-STR COL-STR VALU))
+	(define new-rows (load-joins TBL-STR COL-STR VALU))
 
-	(if (nil? new-row)
+	; Hmm earlier menus now guarantee that new-rows is not nil.
+	(if (nil? new-rows)
 		(format #t
 			"Oh no! Table '~A' doesn't have any rows with '~A' in them!\n"
 			TBL-STR (cog-name VALU))
 		(begin
-			; Bounce back to the table menu
 			(format #t
-				"Bounce to '~A', which joins '~A' for column '~A'.\n"
-				TBL-STR (cog-name VALU) COL-STR)
-			(format #t "If that table has more than one matching row,\n")
-			(format #t "one of the rows will be selected arbitrarily.\n\n")
-			(edge-walk new-row)))
+				"Found ~A rows in '~A', which join to column value '~A'.\n"
+				(length new-rows)
+				TBL-STR (cog-name VALU))
+
+			(define rr (random (length new-rows)))
+			(define rro (list-ref new-rows rr))
+
+			; Bounce back to the table menu
+			(format #t "Randomly selected row ~A of ~A and bouncing to it.\n"
+				rr (length new-rows))
+			(edge-walk rro)))
 )
 
 ;; ---------------------------------------------------
@@ -188,7 +194,7 @@
 
 	; Filter away tables that don't have any content for this join
 	(define tabs (filter
-			(lambda (TAB) (load-join (cog-name TAB) COL-STR join-value))
+			(lambda (TAB) (not (nil? (load-joins (cog-name TAB) COL-STR join-value))))
 		preds))
 
 	(define (valid-table? TBL-STR)
