@@ -30,6 +30,9 @@ column name). Two demos: a basic demo, showing the basic idea, and
 an ASCII table browser, allowing you to pilot around, bouncing from
 table to table, along joins. It's an ASCII browser because all of
 the graphical browsers for the AtomSpace have been neglected.
+(These: [atomspace-explorer](https://github.com/opencog/atomspace-explorer),
+[atomspace-typescript](https://github.com/opencog/atomspace-typescript) and
+[cogprotolab](https://github.com/opencog/cogprotolab).)
 
 History
 -------
