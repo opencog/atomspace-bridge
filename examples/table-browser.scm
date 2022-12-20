@@ -99,6 +99,7 @@
 
 	;; (format #t "Read >>~A<<\n" tbl-str)
 	(cond
+		((eof-object? tbl-str) (exit))
 		((equal? 0 (string-length tbl-str))
 			(table-select))
 
@@ -131,14 +132,21 @@
 (define (join-walk TBL-STR COL-STR VALU)
 	(define table (cog-node 'Predicate TBL-STR))
 	(define vardecl (get-vardecl COL-STR))
-	(format #t "duuude yo ~A col=~A join=~A\n" table vardecl VALU))
 
-xxxxxxxx
-(cog-foreign-load-row flystore
-	(Predicate "genotype")
-	(Variable "genotype_id")
-	(Number 464522))
+	; Load if from SQL. For example:
+	;    (cog-foreign-load-row flystore
+	;        (Predicate "genotype") (Variable "genotype_id") (Number 464522))
+	(define new-row (cog-foreign-load-row flystore table (gar vardecl) VALU))
 
+	; And now, bounce back to the table menu
+	(when (not (nil? new-row))
+		(format #t
+			"Bouncing to table ~A which has the same value '~A' for column '~A'.\n"
+			(cog-name (gar new-row))
+			(cog-name VALU)
+			COL-STR)
+		(edge-walk new-row))
+)
 
 ;; ---------------------------------------------------
 ; Given a string COL-STR naming a column, print all of the
@@ -185,6 +193,7 @@ xxxxxxxx
 	(define col-str (get-line (current-input-port)))
 	(define (valid-col? COL-STR) (get-vardecl COL-STR))
 	(cond
+		((eof-object? col-str) #f)
 		((equal? 0 (string-length col-str)) (edge-walk ROW))
 		((equal? "q" col-str) #f)
 		((valid-col? col-str) (table-walk ROW col-str))
