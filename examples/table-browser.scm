@@ -204,7 +204,11 @@
 	(cond
 		((equal? 0 ntabs) #f)
 		((equal? 1 ntabs)
-			(join-walk (cog-name (car tabs)) COL-STR join-value))
+			(begin
+				(format #t
+					"Only one table contains the column '~A'; jumpting to it\n"
+					 COL-STR)
+				(join-walk (cog-name (car tabs)) COL-STR join-value)))
 		(else
 			(begin
 				(format #t "Tables containing the column '~A' are:\n" COL-STR)
