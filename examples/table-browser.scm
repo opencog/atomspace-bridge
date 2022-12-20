@@ -54,6 +54,28 @@
 		(cog-outgoing-set naked)))
 
 ;; ---------------------------------------------------
+; Get the TypedVariable for string COL-STR, else #f
+(define (get-vardecl COL-STR)
+	(define varname (cog-node 'Variable COL-STR))
+	(if (nil? varname) #f
+		(car (cog-incoming-by-type varname 'TypedVariable))))
+
+;; ---------------------------------------------------
+; Return the value for COL-STR in ROW
+; The returned value will be a ConceptNode or NumberNode
+(define (get-column-value ROW COL-STR)
+	(define vardecl (get-vardecl COL-STR)) ; TypedVariable
+	(define table (gar ROW))  ; Predicate
+	(define naked (gdr ROW))  ; ListLink
+	(define siggy (car (cog-incoming-by-type table 'Signature)))
+	(define varli (cog-value-ref siggy 1))  ; VariableList
+	(define offset
+		(list-index
+			(lambda (TYVAR) (equal? TYVAR vardecl))
+			(cog-outgoing-set varli)))
+	(list-ref (cog-outgoing-set naked) offset))
+
+;; ---------------------------------------------------
 ;
 ; Select a table and load it.
 (define (table-select)
@@ -93,28 +115,13 @@
 	))))))
 
 ;; ---------------------------------------------------
-
-; Get the TypedVariable for string COL, else #f
-(define (get-vardecl COL)
-	(define varname (cog-node 'Variable COL))
-	(if (nil? varname) #f
-		(car (cog-incoming-by-type varname 'TypedVariable))))
-
-(define (valid-col? COL) (get-vardecl COL))
-
-;; ---------------------------------------------------
 (define (valid-table? TBL)
 	#t)
 
-(define (foo-walk TBL COL VALU)
+(define (join-walk TBL COL-STR VALU)
 	(format #t "duuude yo ~A col=~A join=~A\n" TBL COL VALU))
 
 ;; ---------------------------------------------------
-; Return the value for COL in ROW
-(define (get-column-value ROW COL)
-	#f
-)
-
 ; Given a string COL-STR naming a column, print all of the
 ; tables that have that column. Let the user pick a table,
 ; then bounce to that table. Once there, load the row that
@@ -151,6 +158,7 @@
 	(format #t "Enter a column name. Enter 'q' to return to the main prompt.\n")
 	(format #t "select-edge> ~!")
 	(define col-str (get-line (current-input-port)))
+	(define (valid-col? COL-STR) (get-vardecl COL-STR))
 	(cond
 		((equal? 0 (string-length col-str)) (edge-walk ROW))
 		((equal? "q" col-str) #f)
