@@ -66,8 +66,8 @@ void ForeignPersistSCM::init(void)
 {
 	define_scheme_primitive("cog-foreign-load-tables",
 		&ForeignPersistSCM::do_load_tables, this, "persist-foreign");
-	define_scheme_primitive("cog-foreign-load-row",
-		&ForeignPersistSCM::do_load_row, this, "persist-foreign");
+	define_scheme_primitive("cog-foreign-load-rows",
+		&ForeignPersistSCM::do_load_rows, this, "persist-foreign");
 }
 
 ForeignPersistSCM::~ForeignPersistSCM()
@@ -87,13 +87,13 @@ HandleSeq ForeignPersistSCM::do_load_tables(const Handle& ston)
 	return stnp->load_tables();
 }
 
-Handle ForeignPersistSCM::do_load_row(const Handle& ston,
-                                         const Handle& table,
-                                         const Handle& column,
-                                         const Handle& entry)
+HandleSeq ForeignPersistSCM::do_load_rows(const Handle& ston,
+                                          const Handle& table,
+                                          const Handle& column,
+                                          const Handle& entry)
 {
-	GET_STNP("cog-foreign-load-row");
-	return stnp->load_row(table, column, entry);
+	GET_STNP("cog-foreign-load-rows");
+	return stnp->load_rows(table, column, entry);
 }
 
 void opencog_persist_fdi_init(void)

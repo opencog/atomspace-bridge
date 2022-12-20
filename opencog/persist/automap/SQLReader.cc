@@ -233,9 +233,15 @@ void ForeignStorage::load_column(const Handle& hv)
 
 /* ================================================================ */
 
-/// Load a single row fom a single table, given just an entry in
-/// that row, a column descriptor for the entry, and the table name.
-void ForeignStorage::load_one_row(const Handle& entry,     // Concept or Number
+/// Load rows from a single table, given just an entry in that row,
+/// a column descriptor for the entry, and the table name. Note that
+/// this can result in multiple rows being loaded, if that entry appears
+/// in multiple rows. of course, if 'entry' is a PRIMARY KEY then only
+/// one row is returned.
+///
+/// This creates an SQL 'SELECT ... WHERE ...' statement, and runs it.
+///
+void ForeignStorage::select_where(const Handle& entry,     // Concept or Number
                                   const Handle& coldesc,   // TypedVariable
                                   const Handle& tablename) // PredicateNode
 {
@@ -255,13 +261,13 @@ void ForeignStorage::load_one_row(const Handle& entry,     // Concept or Number
 	load_selected_rows(tablename, buff);
 }
 
-/// Load a single row fom a single table, given just an entry in
-/// that row, a column name for that entry, and the table name.
+/// Load rows from a single table, given just an entry in that row, a
+/// column name for that entry, and the table name.
 /// Converts the column name into a column descriptor and calls the
 /// function above.
-Handle ForeignStorage::load_row(const Handle& tablename, // PredicateNode
-                                const Handle& colname,   // VariableNode
-                                const Handle& entry)     // Concept or Number
+HandleSeq ForeignStorage::load_rows(const Handle& tablename, // PredicateNode
+                                    const Handle& colname,   // VariableNode
+                                    const Handle& entry)     // Concept or Number
 {
 	if (not colname->is_type(VARIABLE_NODE))
 		throw RuntimeException(TRACE_INFO,
@@ -269,21 +275,20 @@ Handle ForeignStorage::load_row(const Handle& tablename, // PredicateNode
 
 	HandleSeq colds(colname->getIncomingSetByType(TYPED_VARIABLE_LINK));
 	for (const Handle& coldesc : colds)
-		load_one_row(entry, coldesc, tablename);
+		select_where(entry, coldesc, tablename);
 
 	// As a sop to the user, we're going to return what was found.
 	// Of course, they user could do this themselves. But, for now,
 	// we're trying to coddle them and make them feel good about this.
-	HandleSeq rows(entry->getIncomingSetByType(LIST_LINK));
-	for (const Handle& row : rows)
+	HandleSeq found;
+	HandleSeq anon_rows(entry->getIncomingSetByType(LIST_LINK));
+	for (const Handle& naked : anon_rows)
 	{
-		Handle maybe_this_one =
-			_atom_space->get_link(EVALUATION_LINK, tablename, row);
-		if (maybe_this_one) return maybe_this_one;
+		Handle maybe = _atom_space->get_link(EVALUATION_LINK, tablename, naked);
+		if (maybe) found.emplace_back(maybe);
 	}
 
-	// If we are here, there was no such row. Hmm. OK, whatever.
-	return Handle::UNDEFINED;
+	return found;
 }
 
 /* ================================================================ */
@@ -307,9 +312,7 @@ void ForeignStorage::load_join(const Handle& entry,     // Concept or Number
 	{
 		HandleSeq sigs(varli->getIncomingSetByType(SIGNATURE_LINK));
 		for (const Handle& sig : sigs)
-		{
-			load_one_row(entry, coldesc, sig->getOutgoingAtom(0));
-		}
+			select_where(entry, coldesc, sig->getOutgoingAtom(0));
 	}
 }
 

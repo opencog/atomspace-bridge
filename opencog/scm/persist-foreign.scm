@@ -9,7 +9,7 @@
 (use-modules (opencog fdi-config))
 (load-extension (string-append opencog-ext-path-persist-fdi "libpersist-fdi") "opencog_persist_fdi_init")
 
-(export cog-foreign-load-tables cog-foreign-load-row)
+(export cog-foreign-load-tables cog-foreign-load-rows)
 
 (set-procedure-property! cog-foreign-load-tables 'documentation
 "
@@ -19,14 +19,16 @@
   (not implemeneted)
 ")
 
-(set-procedure-property! cog-foreign-load-row 'documentation
+(set-procedure-property! cog-foreign-load-rows 'documentation
 "
-  cog-foreign-load-row STORAGE TABLE COLUMN ITEM - Load row containing ITEM
+  cog-foreign-load-rows STORAGE TABLE COLUMN ITEM - Load rows containing ITEM
 
   The ITEM is assumed to be some entry located in COLUMN in TABLE.
+  This returns a list of rows that match; there may be zero, one or more.
+  If ITEM is a PRIMARY KEY, there will be at most one row.
 
   Example:
-    (cog-foreign-load-row
+    (cog-foreign-load-rows
         (ForeignStorage \"postgres:///flybase\")
         (Predicate \"genotype\")
         (Variable \"genotype_id\")
