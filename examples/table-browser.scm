@@ -144,7 +144,7 @@
 	(define lro
 		(cog-foreign-load-rows flystore TBL (Variable COL-STR) VALU))
 	(if (< 0 (length lro))
-		(format #t "Loaded ~A joining rows for ~A.~A=~A\n"
+		(format #t "Loaded ~A joining rows for '~A.~A=~A'\n"
 			(length lro) (cog-name TBL) COL-STR (cog-name VALU)))
 	lro
 )
