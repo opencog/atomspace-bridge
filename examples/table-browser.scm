@@ -135,29 +135,38 @@
 ;
 ; Given a selected table (as string) and a selected column (as string)
 ; and a value for that column, load a row in that table, having this
-; value for this column.  Then bounce to the edge secletion menu again.
-(define (join-walk TBL-STR COL-STR VALU)
+; value for this column.  If there are no such rows, return #f.
+(define (load-join TBL-STR COL-STR VALU)
 	(define table (cog-node 'Predicate TBL-STR))
 	(define vardecl (get-vardecl COL-STR))
 
 	; Load if from SQL. For example:
 	;    (cog-foreign-load-row flystore
 	;        (Predicate "genotype") (Variable "genotype_id") (Number 464522))
-	(define new-row (cog-foreign-load-row flystore table (gar vardecl) VALU))
+	(cog-foreign-load-row flystore table (gar vardecl) VALU)
+)
 
-	; And now, bounce back to the table menu
-	(when (not (nil? new-row))
-		(format #t
-			"Bouncing to table '~A', which has the same value '~A'\n   for column '~A'.\n"
-			TBL-STR (cog-name VALU) COL-STR)
-		(format #t "If that table has more than one matching row,\n")
-		(format #t "one of the rows will be selected arbitrarily.\n\n")
-		(edge-walk new-row))
+;; ---------------------------------------------------
+;
+; Given a selected table (as string) and a selected column (as string)
+; and a value for that column, load a row in that table, having this
+; value for this column.  Then bounce to the edge secletion menu again.
+(define (join-walk TBL-STR COL-STR VALU)
+
+	(define new-row (load-join TBL-STR COL-STR VALU))
 
 	(if (nil? new-row)
 		(format #t
 			"Oh no! Table '~A' doesn't have any rows with '~A' in them!\n"
-			TBL-STR (cog-name VALU)))
+			TBL-STR (cog-name VALU))
+		(begin
+			; Bounce back to the table menu
+			(format #t
+				"Bounce to '~A', which has the same value '~A' for column '~A'.\n"
+				TBL-STR (cog-name VALU) COL-STR)
+			(format #t "If that table has more than one matching row,\n")
+			(format #t "one of the rows will be selected arbitrarily.\n\n")
+			(edge-walk new-row)))
 )
 
 ;; ---------------------------------------------------
