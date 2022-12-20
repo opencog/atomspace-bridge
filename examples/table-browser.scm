@@ -168,7 +168,7 @@
 				numr TBL-STR (cog-name VALU))
 
 			; Bounce back to the table menu
-			(format #t "Randomly selected row ~A of ~A and bouncing to it.\n"
+			(format #t "Randomly selected row ~A/~A and bouncing to it.\n"
 				rr numr)
 			(edge-walk (list-ref new-rows rr))))
 )
