@@ -176,20 +176,28 @@
 ; joins to the same column value.
 ;
 (define (table-walk ROW COL-STR)
-	(define vardecl (get-vardecl COL-STR))
+	(define vardecl (get-vardecl COL-STR)) ; TypedVariable
 	(define varlis (cog-incoming-by-type vardecl 'VariableList))
 	(define sigs (map
 		(lambda (VARLI) (car (cog-incoming-by-type VARLI 'Signature)))
 		varlis))
-	(define preds (map gar sigs))
+	(define preds (map gar sigs))  ; List of PredicateNodes
+
+	; The value in this row and this column
+	(define join-value (get-column-value ROW COL-STR))
+
+	; Filter away tables that don't have any content for this join
+	(define tabs (filter
+			(lambda (TAB) (load-join (cog-name TAB) COL-STR join-value))
+		preds))
 
 	(define (valid-table? TBL-STR)
 		(define tabname (cog-node 'Predicate TBL-STR))
 		(if (not tabname) #f
-			(any (lambda (PRED) (equal? PRED tabname)) preds)))
+			(any (lambda (PRED) (equal? PRED tabname)) tabs)))
 
 	(format #t "Tables containing the column '~A' are:\n" COL-STR)
-	(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) preds)
+	(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) tabs)
 	(format #t "Pick a table from the above:\n")
 	(format #t "select-target> ~!")
 	(define tbl-str (get-line (current-input-port)))
@@ -197,8 +205,7 @@
 	(cond
 		((equal? 0 (string-length tbl-str)) (table-walk ROW COL-STR))
 		((equal? "q" tbl-str) #f)
-		((valid-table? tbl-str)
-			(join-walk tbl-str COL-STR (get-column-value ROW COL-STR)))
+		((valid-table? tbl-str) (join-walk tbl-str COL-STR join-value))
 		(else
 			(begin
 				(format #t "Unknown table '~A'\n" tbl-str)
