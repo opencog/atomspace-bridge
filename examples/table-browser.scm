@@ -162,7 +162,7 @@
 		(begin
 			; Bounce back to the table menu
 			(format #t
-				"Bounce to '~A', which has the same value '~A' for column '~A'.\n"
+				"Bounce to '~A', which joins '~A' for column '~A'.\n"
 				TBL-STR (cog-name VALU) COL-STR)
 			(format #t "If that table has more than one matching row,\n")
 			(format #t "one of the rows will be selected arbitrarily.\n\n")
@@ -238,6 +238,7 @@
 	(format #t "Available commands:\n")
 	(format #t "   exit -- quit\n")
 	(format #t "   shell -- escape into the guile shell\n")
+	(format #t "            Say '(browser-shell)' to get back to the brower\n")
 	(format #t "   load-table -- to load an entire SQL table\n")
 	(format #t "   set-table -- to set the current SQL table to browse\n")
 	(format #t "   random-row -- print a random row in the current table\n")
