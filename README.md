@@ -23,7 +23,7 @@ At this time, only Postgres is supported.
 
 Status
 ------
-***Version 0.2.0*** -- The current implementation can load table
+***Version 0.2.1*** -- The current implementation can load table
 descriptions and table contents from Postgres DB's. It can also
 load related rows and columns (rows and columns joined by a common
 column name). Two demos: a basic demo, showing the basic idea, and
