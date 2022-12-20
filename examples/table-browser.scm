@@ -194,26 +194,34 @@
 	(define tabs (filter
 			(lambda (TAB) (not (nil? (load-joins (cog-name TAB) COL-STR join-value))))
 		preds))
+	(define ntabs (length tabs))
 
 	(define (valid-table? TBL-STR)
 		(define tabname (cog-node 'Predicate TBL-STR))
 		(if (not tabname) #f
 			(any (lambda (PRED) (equal? PRED tabname)) tabs)))
 
-	(format #t "Tables containing the column '~A' are:\n" COL-STR)
-	(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) tabs)
-	(format #t "Pick a table from the above:\n")
-	(format #t "select-target> ~!")
-	(define tbl-str (get-line (current-input-port)))
-	(newline)
 	(cond
-		((equal? 0 (string-length tbl-str)) (table-walk ROW COL-STR))
-		((equal? "q" tbl-str) #f)
-		((valid-table? tbl-str) (join-walk tbl-str COL-STR join-value))
+		((equal? 0 ntabs) #f)
+		((equal? 1 ntabs)
+			(join-walk (cog-name (car tabs)) COL-STR join-value))
 		(else
 			(begin
-				(format #t "Unknown table '~A'\n" tbl-str)
-				(table-walk ROW COL-STR)))))
+				(format #t "Tables containing the column '~A' are:\n" COL-STR)
+				(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) tabs)
+				(format #t "Pick a table from the above:\n")
+				(format #t "select-target> ~!")
+				(define tbl-str (get-line (current-input-port)))
+				(newline)
+				(cond
+					((equal? 0 (string-length tbl-str)) (table-walk ROW COL-STR))
+					((equal? "q" tbl-str) #f)
+					((valid-table? tbl-str) (join-walk tbl-str COL-STR join-value))
+					(else
+						(begin
+							(format #t "Unknown table '~A'\n" tbl-str)
+							(table-walk ROW COL-STR)))))))
+)
 
 ;; ---------------------------------------------------
 ; Given a row in a table, ask user to pick a column from that table.
