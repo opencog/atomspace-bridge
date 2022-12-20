@@ -24,8 +24,12 @@
 (format #t "SQL Table Browser Demo\n\n")
 (format #t "Enter a Postgres DB to open:\n")
 (format #t "   For example, \"postgres:///flybase\"\n")
+(format #t "   If you just hit enter, flybase will be used.\n")
 
 (define db-str (get-line (current-input-port)))
+(newline)
+(if (eof-object? db-str) (exit))
+
 (if (equal? 0 (string-length db-str))
 	(set! db-str "postgres:///flybase"))
 
@@ -141,11 +145,16 @@
 	; And now, bounce back to the table menu
 	(when (not (nil? new-row))
 		(format #t
-			"Bouncing to table ~A which has the same value '~A' for column '~A'.\n"
-			(cog-name (gar new-row))
-			(cog-name VALU)
-			COL-STR)
+			"Bouncing to table '~A', which has the same value '~A'\n   for column '~A'.\n"
+			TBL-STR (cog-name VALU) COL-STR)
+		(format #t "If that table has more than one matching row,\n")
+		(format #t "one of the rows will be selected arbitrarily.\n\n")
 		(edge-walk new-row))
+
+	(if (nil? new-row)
+		(format #t
+			"Oh no! Table '~A' doesn't have any rows with '~A' in them!\n"
+			TBL-STR (cog-name VALU)))
 )
 
 ;; ---------------------------------------------------
@@ -172,6 +181,7 @@
 	(format #t "Pick a table from the above:\n")
 	(format #t "select-target> ~!")
 	(define tbl-str (get-line (current-input-port)))
+	(newline)
 	(cond
 		((equal? 0 (string-length tbl-str)) (table-walk ROW COL-STR))
 		((equal? "q" tbl-str) #f)
@@ -188,9 +198,10 @@
 ; Here, ROW is expected to be an EvaluationLink holding the row.
 (define (edge-walk ROW)
 	(print-row ROW)
-	(format #t "Enter a column name. Enter 'q' to return to the main prompt.\n")
+	(format #t "\nEnter a column name. Enter 'q' to return to the main prompt.\n")
 	(format #t "select-edge> ~!")
 	(define col-str (get-line (current-input-port)))
+	(newline)
 	(define (valid-col? COL-STR) (get-vardecl COL-STR))
 	(cond
 		((eof-object? col-str) #f)
@@ -221,6 +232,7 @@
 	(format #t "Enter a command. Enter '?' for a list of commands.\n")
 	(format #t "browser> ~!")
 	(define cmd-str (get-line (current-input-port)))
+	(newline)
 	(cond
 		((eof-object? cmd-str) (exit))
 		((equal? 0 (string-length cmd-str)) #f)
