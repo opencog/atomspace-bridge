@@ -115,11 +115,11 @@
 	))))))
 
 ;; ---------------------------------------------------
-(define (valid-table? TBL)
-	#t)
 
-(define (join-walk TBL COL-STR VALU)
-	(format #t "duuude yo ~A col=~A join=~A\n" TBL COL VALU))
+(define (join-walk TBL-STR COL-STR VALU)
+	(define table (cog-node 'Predicate TBL-STR))
+	(define vardecl (get-vardecl COL-STR))
+	(format #t "duuude yo ~A col=~A join=~A\n" table vardecl VALU))
 
 ;; ---------------------------------------------------
 ; Given a string COL-STR naming a column, print all of the
@@ -134,7 +134,13 @@
 		(lambda (VARLI) (car (cog-incoming-by-type VARLI 'Signature)))
 		varlis))
 	(define preds (map gar sigs))
-	(format #t "Tables containg the column '~A' are:\n" COL-STR)
+
+	(define (valid-table? TBL-STR)
+		(define tabname (cog-node 'Predicate TBL-STR))
+		(if (not tabname) #f
+			(any (lambda (PRED) (equal? PRED tabname)) preds)))
+
+	(format #t "Tables containing the column '~A' are:\n" COL-STR)
 	(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) preds)
 	(format #t "Pick a table from the above:\n")
 	(format #t "select-target> ~!")
