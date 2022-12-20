@@ -132,7 +132,10 @@
 	))))))
 
 ;; ---------------------------------------------------
-
+;
+; Given a selected table (as string) and a selected column (as string)
+; and a value for that column, load a row in that table, having this
+; value for this column.  Then bounce to the edge secletion menu again.
 (define (join-walk TBL-STR COL-STR VALU)
 	(define table (cog-node 'Predicate TBL-STR))
 	(define vardecl (get-vardecl COL-STR))
