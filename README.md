@@ -16,7 +16,7 @@ The following are desired features:
   [Atomese](https://wiki.opencog.org/w/Atomese) representations.
 * Both the read and the update of the SQL tables is provided.
 
-We're call this "automapping" but it could also be called a
+We're calling this "automapping" but it could also be called a
 "Foreign Data Interface" (FDI) to the AtomSpace.
 
 At this time, only Postgres is supported.
@@ -29,14 +29,14 @@ load related rows and columns (rows and columns joined by a common
 column name). Two demos: a basic demo, showing the basic idea, and
 an ASCII table browser, allowing you to pilot around, bouncing from
 table to table, along joins. It's an ASCII browser because all of
-the graphical browsers have been neglected.
+the graphical browsers for the AtomSpace have been neglected.
 
 History
 -------
 Per request of Mike Duncan, Dec 2022. Map the
 [FlyBase Drosophila Genome Database](http://flybase.org)
 (current release
-[here](https://ftp.flybase.net/releases/FB2022_06/psql/FB2022_06.sql.gz)
+[here](https://ftp.flybase.net/releases/FB2022_06/psql/FB2022_06.sql.gz))
 into the AtomSpace, using the
 [Chado](http://gmod.org/wiki/Chado)
 schema given [here](http://gmod.org/wiki/Chado_Tables).
@@ -60,10 +60,13 @@ Atomese [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink).
 
 Primary and Foreign Keys
 ------------------------
-The primary mapping problem is what to do with primary and foreign keys.
-The simplest solution is to "do nothing" and let the user just wing it.
-That is, to join tables together, the user would write Atomese queries
-that include the key to be joined.  This works and is surprisingly flexible.
+The biggest question is what to do with primary and foreign keys.
+The simplest solution is to "do nothing" and just import rows from
+SQL straight-up. Whatever primary/foreign keys are in the SQL tables
+will also appear in the AtomSpace, and will be joined automatically,
+as is the convention for the AtomSpace. Writing complex queries
+appears to be straight-forward (easier than writing SQL queries).
+This works and is surprisingly flexible.
 
 Other mappings are possible; however, there is no natural way of asking
 Postgres which table columns are foreign keys, and which other tables
@@ -74,7 +77,7 @@ So, for example:
 
 ```
    Evaluation
-      Predicate "key join relation"
+      Predicate "some join relation"
       Set
          Evaluation ;;; row in the host table
             Predicate "some tablename"
@@ -92,23 +95,24 @@ See the OpenCog wiki:
 * [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink)
 * [PredicateNode](https://wiki.opencog.org/w/PredicateNode)
 
-From what I can tell, the above uses about the same amount of RAM as
-having explicit keys in each row. It also takes just about the same
-amount of time to query over. So it does not seem to offer any size
-or performance advantage over brute-force primary/foreign keys.
+From what I can tell, the above alternate form uses about the same
+amount of RAM as having explicit keys in each row. It also takes
+just about the same amount of time to query over. So it does not
+seem to offer any size or performance advantage over brute-force
+primary/foreign keys.
 
 What it does do is provide a lot more flexibility: you can create and
 destroy joins at any time. You can join some rows but not others. All
 the usual stuff that makes the AtomSpace much more flexible than SQL.
 
 For just right now, we punt, and store the naked PRIMARY/FOREIGN KEY
-values as Atoms in the AtomSpace. It's klunky but it works.
+values as Atoms in the AtomSpace. It feels ugly, but it works.
 
 Table Schemas
 -------------
 SQL table definitions provide a definition of the columns of that
 table.  These are imported into the AtomSpace, where they are used
-to fhind they names of columns, and the types. (Note that the
+to find the names of the columns, and the types. (Note that the
 `EvaluationLink` above does not contain the column names.)
 Below is the current mapping.
 
@@ -134,25 +138,32 @@ See the OpenCog wiki:
 * [TypedVariable](https://wiki.opencog.org/w/TypedVariable)
 * [TypeNode](https://wiki.opencog.org/w/TypeNode)
 
-The base AtomSpace supports only a few primitive types that
-correspond to conventional SQL DB types. Perhaps this could be
-enriched, e.g. by creating:
-* `StringNode` for SQL `TEXT` and `VARCHAR`
-* `DateNode` for SQL dates and times
+The base AtomSpace supports only a few primitive types; there's no
+direct analog to the varied primitive types that SQL has. So far,
+it doesn't seem to be needed.  Perhaps the set of primitive types
+could be enriched, e.g. by creating:
+* `StringNode` for SQL `TEXT` and `VARCHAR` (instead of ConceptNode)
+* `DateNode` for SQL dates and times.
 * `IntegerNode` (the existing
   [NumberNode](https://wiki.opencog.org/w/NumberNode) is a vector of
-  floats)
+  floats. It works great, but some people just love ints.)
 
 Specific databases might benefit from custom types:
 * `GeneNode`
 * `ProteinNode`
 * `URLNode`
 * `HumanReadableDescriptionNode`
+* `YourFavoriteIdeaHereNode`
+
+The [agi-bio](https://github.com/opencog/agi-bio) project provides
+the first two types. The
+[cheminformatics](https://github.com/opencog/cheminformatics) project
+provides types for atomic elements and molecular binding.
 
 Using
 -----
 Below is a sketch of how things could work. For actual examples that
-actually run and actually do things, see the
+actually run and actually work correctly, see the
 [examples directory](./examples).
 
 Examples of accessing data in a foreign database.
@@ -160,34 +171,37 @@ Examples of accessing data in a foreign database.
 ```
 ; Describe where it is located.
 (define foreign-db
-   (ForeignStoreageNode "postgres://example.com/foo?user=foo&passwd=bar"))
+   (ForeignStorageNode "postgres://example.com/foo?user=foo&passwd=bar"))
 
 ; Open it.
 (cog-open foreign-db)
 
-; Load the *entire* table `gene.allele`. Optional; only if you actually
-; want the whole table in RAM. We know the table name, and give it
-; directly.
+; Load the *entire* table `gene.allele`. Optional; only if you
+; actually want the whole table in RAM. The table name is known
+; in advance, and is given directly.
 (fetch-incoming-set (Predicate "gene.allele"))
 
-; Instead of loading entire tables, perhaps we only want all rows of
-; all tables that mention gene CG7069.
+; Instead of loading entire tables, perhaps we only want all
+; rows of all tables that mention gene CG7069.
 (fetch-incoming-set (Concept "CG7069"))
 
-; Perhaps we plan to do a join. So, load *all* tables that have a given
-; column name. In this case, all tables having a column called
-; "genotype".
-(fetch-incoming-set (Variable ""genotype"))
+; Perhaps we plan to do a join. So, load *all* tables that have
+; a given column name. In this case, all tables having a column
+; called "genotype".
+(fetch-incoming-set (Variable "genotype"))
 
-; StorageNodes do have the ability to run generic queries, and we could,
-; in principle, translate at least some of the simpler Atomese queries
-; into SQL, and run those.
+; StorageNodes do have the ability to run generic queries, and
+; we could, in principle, translate at least some of the simpler
+; Atomese queries into SQL, and run those.
 (fetch-query (Meet (Evaluation (Predicate "gene.allele")
     (List (Concept "CG7069") (Glob "rest of the row")))))
 
 ; The fetch-query function is already built into the base, core
-; AtomSpace. We could, of course, create custom functions:
+; AtomSpace. We could also create custom functions:
 (automap-get-row "gene.allele" (Concept "CG7069"))
+
+; Custom functions are not appealing, since they don't work
+; with the rest of the StorageNode and ProxNode infrastructure.
 ```
 
 It could be convenient to introduce special-purpose
@@ -220,18 +234,19 @@ which could be marginally more efficient, presuming that the
 
 Building and Installing
 -----------------------
-This module works, and can load tables.  The build process is identical
-to that of other modules in OpenCog.
+This module works. It can load tables, it can load joining columns,
+and it can join rows, all "automatically".  The build process is
+identical to that of other modules in OpenCog.
 
 ### Prerequisites
 
-###### AtomSpace
+##### AtomSpace
 * The AtomSpace, of course.
 * https://github.com/opencog/atomspace
 * It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
-###### Postgres
+##### Postgres
 * SQL Database
 * https://postgres.org | `apt install postgresql postgresql-client libpq-dev`
 
