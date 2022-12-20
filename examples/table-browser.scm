@@ -5,7 +5,7 @@
 ; or hundreds) which are all tied together with each other using
 ; FOREIGN KEY constraints. Each such constraint can be thought of as
 ; the edge of a giant graph. This browser lets you walk those edges,
-; bouncing from table to table, and looking whats there.
+; bouncing from table to table, and looking what's there.
 ;
 ; It would be much better if we had a graphical browser for this, but
 ; they are currently all in disrepair. Alas.
