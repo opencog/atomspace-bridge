@@ -201,6 +201,22 @@
 		(if (not tabname) #f
 			(any (lambda (PRED) (equal? PRED tabname)) tabs)))
 
+	(define (pick-table)
+		(format #t "Tables containing the column '~A' are:\n" COL-STR)
+		(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) tabs)
+		(format #t "Pick a table from the above:\n")
+		(format #t "select-target> ~!")
+		(define tbl-str (get-line (current-input-port)))
+		(newline)
+		(cond
+			((equal? 0 (string-length tbl-str)) (table-walk ROW COL-STR))
+			((equal? "q" tbl-str) #f)
+			((valid-table? tbl-str) (join-walk tbl-str COL-STR join-value))
+			(else
+				(begin
+					(format #t "Unknown table '~A'\n" tbl-str)
+					(table-walk ROW COL-STR)))))
+
 	(cond
 		((equal? 0 ntabs) #f)
 		((equal? 1 ntabs)
@@ -210,21 +226,7 @@
 					 COL-STR)
 				(join-walk (cog-name (car tabs)) COL-STR join-value)))
 		(else
-			(begin
-				(format #t "Tables containing the column '~A' are:\n" COL-STR)
-				(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) tabs)
-				(format #t "Pick a table from the above:\n")
-				(format #t "select-target> ~!")
-				(define tbl-str (get-line (current-input-port)))
-				(newline)
-				(cond
-					((equal? 0 (string-length tbl-str)) (table-walk ROW COL-STR))
-					((equal? "q" tbl-str) #f)
-					((valid-table? tbl-str) (join-walk tbl-str COL-STR join-value))
-					(else
-						(begin
-							(format #t "Unknown table '~A'\n" tbl-str)
-							(table-walk ROW COL-STR)))))))
+			(pick-table)))
 )
 
 ;; ---------------------------------------------------
