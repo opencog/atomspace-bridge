@@ -154,6 +154,8 @@
 (define (join-walk TBL-STR COL-STR VALU)
 
 	(define new-rows (load-joins TBL-STR COL-STR VALU))
+	(define numr (length new-rows))
+	(define rr (random numr))
 
 	; Hmm earlier menus now guarantee that new-rows is not nil.
 	(if (nil? new-rows)
@@ -163,16 +165,12 @@
 		(begin
 			(format #t
 				"Found ~A rows in '~A', which join to column value '~A'.\n"
-				(length new-rows)
-				TBL-STR (cog-name VALU))
-
-			(define rr (random (length new-rows)))
-			(define rro (list-ref new-rows rr))
+				numr TBL-STR (cog-name VALU))
 
 			; Bounce back to the table menu
 			(format #t "Randomly selected row ~A of ~A and bouncing to it.\n"
-				rr (length new-rows))
-			(edge-walk rro)))
+				rr numr)
+			(edge-walk (list-ref new-rows rr))))
 )
 
 ;; ---------------------------------------------------
