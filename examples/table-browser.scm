@@ -143,8 +143,9 @@
 	;        (Predicate "genotype") (Variable "genotype_id") (Number 464522))
 	(define lro
 		(cog-foreign-load-rows flystore TBL (Variable COL-STR) VALU))
-	(format #t "Loaded ~A joining rows for ~A.~A=~A\n"
-		(length lro) (cog-name TBL) COL-STR (cog-name VALU))
+	(if (< 0 (length lro))
+		(format #t "Loaded ~A joining rows for ~A.~A=~A\n"
+			(length lro) (cog-name TBL) COL-STR (cog-name VALU)))
 	lro
 )
 
@@ -225,7 +226,7 @@
 		((equal? 1 ntabs)
 			(begin
 				(format #t
-					"Only one table contains the column '~A'; jumpting to it\n"
+					"Only one table contains the column '~A'; jumping to it\n"
 					 COL-STR)
 				(join-walk (cog-name (car tabs)) COL-STR join-value)))
 		(else
