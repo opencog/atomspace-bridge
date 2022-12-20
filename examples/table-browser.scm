@@ -276,9 +276,9 @@
 		(set! curr-rows
 			(cog-incoming-by-type (Predicate curr-table) 'Evaluation)))
 
-	(define nrows (length(length curr-rows)))
+	(define nrows (length curr-rows))
 	(define rr (random nrows))
-	(format #t "Jump randomly to row ~A or ~A\n" rr nrows)
+	(format #t "Jump randomly to row ~A of ~A\n" rr nrows)
 	(edge-walk (list-ref curr-rows rr)))
 
 (define (browser-shell)
