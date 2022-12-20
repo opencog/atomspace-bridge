@@ -133,17 +133,19 @@
 
 ;; ---------------------------------------------------
 ;
-; Given a selected table (as string) and a selected column (as string)
-; and a value for that column, load all rows in that table, having this
-; value for this column.  If there are no such rows, return '().
-(define (load-joins TBL-STR COL-STR VALU)
-	(define table (cog-node 'Predicate TBL-STR))
-	(define vardecl (get-vardecl COL-STR))
+; Given a selected table (as PredicateNode) and a selected column
+; (as string) and a value for that column, load all rows in that table,
+; having this value for this column.  If there are no such rows, return '().
+(define (load-joins TBL COL-STR VALU)
 
 	; Load if from SQL. For example:
 	;    (cog-foreign-load-rows flystore
 	;        (Predicate "genotype") (Variable "genotype_id") (Number 464522))
-	(cog-foreign-load-rows flystore table (gar vardecl) VALU)
+	(define lro
+		(cog-foreign-load-rows flystore TBL (Variable COL-STR) VALU))
+	(format #t "Loaded ~A joining rows for ~A.~A=~A\n"
+		(length lro) (cog-name TBL) COL-STR (cog-name VALU))
+	lro
 )
 
 ;; ---------------------------------------------------
@@ -153,7 +155,8 @@
 ; value for this column.  Then bounce to the edge secletion menu again.
 (define (join-walk TBL-STR COL-STR VALU)
 
-	(define new-rows (load-joins TBL-STR COL-STR VALU))
+	(define table (cog-node 'Predicate TBL-STR))
+	(define new-rows (load-joins table COL-STR VALU))
 	(define numr (length new-rows))
 	(define rr (random numr))
 
@@ -192,7 +195,7 @@
 
 	; Filter away tables that don't have any content for this join
 	(define tabs (filter
-			(lambda (TAB) (not (nil? (load-joins (cog-name TAB) COL-STR join-value))))
+			(lambda (TAB) (not (nil? (load-joins TAB COL-STR join-value))))
 		preds))
 	(define ntabs (length tabs))
 
