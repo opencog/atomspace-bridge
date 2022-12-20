@@ -1,8 +1,20 @@
 ;
 ; table-browser.scm - Plain-ASCII browser of Chado tables (and other SQL DB's)
 ;
-; Make sure you have a running Postgress database with data in it. If not,
-; See the basic-demo.scm for instructions.
+; This assumes you have a database which has a lot of tables (dozens
+; or hundreds) which are all tied together with each other using
+; FOREIGN KEY constraints. Each such constraint can be thought of as
+; the edge of a giant graph. This browser lets you walk those edges,
+; bouncing from table to table, and looking whats there.
+;
+; It would be much better if we had a graphical browser for this, but
+; they are currently all in disrepair. Alas.
+;
+; The run this, just say `guile -l table-browser.scm` and then
+; follow the prompts.
+;
+; Make sure you have a running Postgres database with data in it.
+; If not, see the `basic-demo.scm` file for instructions.
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 textual-ports))
@@ -121,6 +133,13 @@
 	(define vardecl (get-vardecl COL-STR))
 	(format #t "duuude yo ~A col=~A join=~A\n" table vardecl VALU))
 
+xxxxxxxx
+(cog-foreign-load-row flystore
+	(Predicate "genotype")
+	(Variable "genotype_id")
+	(Number 464522))
+
+
 ;; ---------------------------------------------------
 ; Given a string COL-STR naming a column, print all of the
 ; tables that have that column. Let the user pick a table,
@@ -227,19 +246,4 @@
 
 (browser-shell)
 
-
-#! ---------
-; ----------------------------------------------------
-; Pick a table, any table. Load all data from that table.
-; The genotype table is medium-sized, it contains about
-; half-a-million entries.
-
-(fetch-incoming-set (Number 51808))
-(cog-get-root (Number 51808))
-
-(cog-foreign-load-row flystore
-	(Predicate "genotype")
-	(Variable "genotype_id")
-	(Number 464522))
-
-!#
+; --------------------- END OF FILE -----------------
