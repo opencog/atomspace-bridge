@@ -270,6 +270,17 @@
 (define curr-table #f)
 (define curr-rows #f)
 
+(define (jump-to-random-row)
+	(when (nil? curr-rows)
+		(format #t "This may take a few minutes for large tables\n")
+		(set! curr-rows
+			(cog-incoming-by-type (Predicate curr-table) 'Evaluation)))
+
+	(define nrows (length(length curr-rows)))
+	(define rr (random nrows))
+	(format #t "Jump randomly to row ~A or ~A\n" rr nrows)
+	(edge-walk (list-ref curr-rows rr)))
+
 (define (browser-shell)
 	(format #t "Enter a command. Enter '?' for a list of commands.\n")
 	(format #t "browser> ~!")
@@ -293,13 +304,7 @@
 				(set! curr-table cmd-str)
 				(set! curr-rows #f)))
 
-		((equal? "random-row" cmd-str)
-			(begin
-				(when (not curr-rows)
-					(format #t "This may take a few minutes for large tables\n")
-					(set! curr-rows
-						(cog-incoming-by-type (Predicate curr-table) 'Evaluation)))
-				(edge-walk (list-ref curr-rows (random (length curr-rows))))))
+		((equal? "random-row" cmd-str) (jump-to-random-row))
 
 		(else
 			(format #t "Unknown command ~A\n" cmd-str)))
