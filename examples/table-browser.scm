@@ -37,12 +37,13 @@
 		(cog-outgoing-set varli))
 	(format #t "\n"))
 
+; ROW is assumed to be an EvaluationLink
 (define (print-row ROW)
 	(define table (gar ROW))
 	(define naked (gdr ROW))
 	(define siggy (car (cog-incoming-by-type table 'Signature)))
 	(define varli (cog-value-ref siggy 1))
-	(format #t "Table >>~A<< columns:\n" (cog-name table))
+	(format #t "Table '~A' columns:\n" (cog-name table))
 	(for-each
 		(lambda (TYVAR VALU)
 			(when (not (equal? 0 (string-length (cog-name VALU))))
@@ -101,35 +102,50 @@
 
 (define (valid-col? COL) (get-vardecl COL))
 
+;; ---------------------------------------------------
 (define (valid-table? TBL)
 	#t)
 
-(define (foo-walk TBL COL)
-	(format #t "duuude yo ~A col=~A\n" TBL COL))
+(define (foo-walk TBL COL VALU)
+	(format #t "duuude yo ~A col=~A join=~A\n" TBL COL VALU))
 
-; Allow user to pick a table, then go to that table.
-(define (table-walk COL)
-	(define vardecl (get-vardecl COL))
+;; ---------------------------------------------------
+; Return the value for COL in ROW
+(define (get-column-value ROW COL)
+	#f
+)
+
+; Given a string COL-STR naming a column, print all of the
+; tables that have that column. Let the user pick a table,
+; then bounce to that table. Once there, load the row that
+; joins to the same column value.
+;
+(define (table-walk ROW COL-STR)
+	(define vardecl (get-vardecl COL-STR))
 	(define varlis (cog-incoming-by-type vardecl 'VariableList))
 	(define sigs (map
 		(lambda (VARLI) (car (cog-incoming-by-type VARLI 'Signature)))
 		varlis))
 	(define preds (map gar sigs))
-	(format #t "Tables containg the column '~A' are:\n" COL)
+	(format #t "Tables containg the column '~A' are:\n" COL-STR)
 	(for-each (lambda (PRED) (format #t "   ~A\n" (cog-name PRED))) preds)
 	(format #t "Pick a table from the above:\n")
 	(format #t "select-target> ~!")
 	(define tbl-str (get-line (current-input-port)))
 	(cond
-		((equal? 0 (string-length tbl-str)) (table-walk COL))
+		((equal? 0 (string-length tbl-str)) (table-walk ROW COL-STR))
 		((equal? "q" tbl-str) #f)
-		((valid-table? tbl-str) (foo-walk tbl-str COL))
+		((valid-table? tbl-str)
+			(join-walk tbl-str COL-STR (get-column-value ROW COL-STR)))
 		(else
 			(begin
 				(format #t "Unknown table '~A'\n" tbl-str)
-				(table-walk COL)))))
+				(table-walk ROW COL-STR)))))
 
-; Allow user to pick a column, then go to that column
+;; ---------------------------------------------------
+; Given a row in a table, ask user to pick a column from that table.
+; Then bound to a dialog that shows all other tables with the same column.
+; Here, ROW is expected to be an EvaluationLink holding the row.
 (define (edge-walk ROW)
 	(print-row ROW)
 	(format #t "Enter a column name. Enter 'q' to return to the main prompt.\n")
@@ -138,7 +154,7 @@
 	(cond
 		((equal? 0 (string-length col-str)) (edge-walk ROW))
 		((equal? "q" col-str) #f)
-		((valid-col? col-str) (table-walk col-str))
+		((valid-col? col-str) (table-walk ROW col-str))
 		(else
 			(begin
 				(format #t "Unknown column '~A'\n" col-str)
@@ -164,6 +180,7 @@
 	(format #t "browser> ~!")
 	(define cmd-str (get-line (current-input-port)))
 	(cond
+		((eof-object? cmd-str) (exit))
 		((equal? 0 (string-length cmd-str)) #f)
 
 		((equal? "?" cmd-str) (prt-commands))
