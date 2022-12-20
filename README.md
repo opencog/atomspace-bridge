@@ -23,9 +23,13 @@ At this time, only Postgres is supported.
 
 Status
 ------
-***Version 0.1.0*** -- A collection of design notes. An implementation
-that can load table descriptions and table contents from Postgres DB's.
-Provides just enough to be basically usable, with no fancy features.
+***Version 0.2.0*** -- The current implementation can load table
+descriptions and table contents from Postgres DB's. It can also
+load related rows and columns (rows and columns joined by a common
+column name). Two demos: a basic demo, showing the basic idea, and
+an ASCII table browser, allowing you to pilot around, bouncing from
+table to table, along joins. It's an ASCII browser because all of
+the graphical browsers have been neglected.
 
 History
 -------
