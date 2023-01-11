@@ -260,7 +260,7 @@
 	(format #t "Available commands:\n")
 	(format #t "   exit -- quit\n")
 	(format #t "   shell -- escape into the guile shell\n")
-	(format #t "            Say '(browser-shell)' to get back to the brower\n")
+	(format #t "            Say '(browser-shell)' to get back to the browser\n")
 	(format #t "   load-table -- to load an entire SQL table\n")
 	(format #t "   set-table -- to set the current SQL table to browse\n")
 	(format #t "   random-row -- print a random row in the current table\n")

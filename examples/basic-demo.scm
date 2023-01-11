@@ -142,13 +142,13 @@
 ; that "genotype_id" as a column. So, ten rows, from ten tables, were
 ; loaded. Lets look at them, row by row. Hmm. Apparently, not all of
 ; the tables have a row for this genotype, and one table, the
-; "Class II allele. Eye discs are very small. Larval survival rate of homozygotes is 30% of heterozygotes with wild type."feature_genotype" table, has three rows for it. OK.
+; "feature_genotype" table, has three rows for it. OK.
 
 (cog-get-root (Number 362100))
 
-; Holy cow. Well, that's prety boring. Apparently, most tables are just
-; relations, pointing to things in other tables. Well, that's should not
-; be a surprise. The genotypes for a large, complex tangled graph, with
+; Holy cow. Well, that's pretty boring. Apparently, most tables are just
+; relations, pointing to things in other tables. Well, that should not
+; be a surprise. The genotypes form a large, complex tangled graph, with
 ; edges going from here to there, everywhere. There's no easy way to
 ; encode a graph in SQL, except to use lots of FOREIGN KEY's connecting
 ; hundreds of tables together.  And that's exactly what flybase does.
@@ -172,7 +172,7 @@
 ; ----------------------------------------------------
 ; OK. So the above is getting boring. Lets do some bulk loads.
 ; Load all data from all tables having a given column name.
-; Somewhat incautiously, well pick the genotype_id column. There's
+; Somewhat incautiously, we pick the genotype_id column. There's
 ; some fair amount of data there. This load will take 1 to 5 minutes,
 ; and will chew up about 7GBytes of RAM.
 (fetch-incoming-set (Variable "genotype_id"))
