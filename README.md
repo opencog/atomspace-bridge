@@ -17,7 +17,9 @@ The following are desired features:
 * Both the read and the update of the SQL tables is provided.
 
 We're calling this "automapping" but it could also be called a
-"Foreign Data Interface" (FDI) to the AtomSpace.
+"Foreign Data Interface" (FDI) to the AtomSpace. Perhaps the best name
+would have been `atomspace-bridge`, since its a "data bridge",
+connecting the SQL and AtomSpace worlds.
 
 At this time, only Postgres is supported.
 
