@@ -1,25 +1,32 @@
-Automapping of SQL DB's
+AtomSpace-SQL DB Bridge
 =======================
-
-Design goals: Automatically map pre-existing SQL DB's to/from the
-AtomSpace. This is *not* intended for generic save/restore of the
-AtomSpace itself. For that, see the native
+The bridge connects pre-existing SQL DB's to the AtomSpace, so that
+data can move between the two, in both directions.  It is meant to allow
+the AtomSpace to access foreign, external data, and manipulate it using
+the AtomSpace software stack.  This is *not* intended for generic
+save/restore of AtomSpace contents. For that, see the native
 [atomspace-rocks](https://github.com/opencog/atomspace-rocks) RocksDB
 [StorageNode](https://wiki.opencog.org/w/StorageNode) and the
 [atomspace-cog](https://github.com/opencog/atomspace-cog) network
 StorageNode.
 
 The following are desired features:
-* Creation of maps from the SQL tables to AtomSpace structures is
-  mostly or fully automated, by importing pre-existing SQL table schemas.
-* Custom maps can be specified, so as to allow more "natural"
+* Automatic creation of maps from the SQL tables to AtomSpace
+  structures. Fully automated, by importing pre-existing SQL table
+  schemas. Optionally, this can be overloaded with custom templates.
+* Custom mappings or templates would allow more "natural"
   [Atomese](https://wiki.opencog.org/w/Atomese) representations.
-* Both the read and the update of the SQL tables is provided.
-
-We're calling this "automapping" but it could also be called a
-"Foreign Data Interface" (FDI) to the AtomSpace. Perhaps the best name
-would have been `atomspace-bridge`, since its a "data bridge",
-connecting the SQL and AtomSpace worlds.
+  Complex SQL systems tend to have ugly, convoluted table structures
+  with complex primary-key/foreign-key interactions. It would be nice
+  to hide this in the AtomSpace mapping, so that we don't import the
+  grunge and cruft of the SQL table designs.
+* The bridge should allow both the read and the update of the contents
+  (rows) in the SQL tables (while maintaining all foreign-key
+  constraints during writing.)
+* The bridge loads data incrementally. The bridge does not require
+  a bulk import/export, but rather will access individual rows, columns
+  and tables on an as-needed basis. This would allow the AtomSpace to
+  work with datasets that are too big to fit in RAM.
 
 At this time, only Postgres is supported.
 
@@ -57,7 +64,7 @@ Atomese [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink).
    Evaluation                ; A single row in the table.
       Predicate "tablename"  ; Replace by actual name of table.
       List                   ; This list is one row in the table.
-         Concept "column 1"  ; Entry in that column, if its a string.
+         Concept "thing"     ; Entry in that column, if its a string.
          NumberNode 42       ; If that column type is a number.
          ...
          Concept "stuffs"    ; Last column in the table.
@@ -65,13 +72,13 @@ Atomese [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink).
 
 Primary and Foreign Keys
 ------------------------
-The biggest question is what to do with primary and foreign keys.
+The biggest design question is what to do with primary and foreign keys.
 The simplest solution is to "do nothing" and just import rows from
-SQL straight-up. Whatever primary/foreign keys are in the SQL tables
-will also appear in the AtomSpace, and will be joined automatically,
-as is the convention for the AtomSpace. Writing complex queries
-appears to be straight-forward (easier than writing SQL queries).
-This works and is surprisingly flexible.
+SQL straight-up. Whatever primary/foreign keys are in the SQL tables,
+they will also appear in the AtomSpace. They will join automatically,
+due to fundamental AtomSpace architecture. With this solution, writing
+complex queries appears to be straight-forward (and easier than writing
+SQL queries).  This works and is surprisingly flexible.
 
 Other mappings are possible; however, there is no natural way of asking
 Postgres which table columns are foreign keys, and which other tables
@@ -106,9 +113,10 @@ just about the same amount of time to query over. So it does not
 seem to offer any size or performance advantage over brute-force
 primary/foreign keys.
 
-What it does do is provide a lot more flexibility: you can create and
-destroy joins at any time. You can join some rows but not others. All
-the usual stuff that makes the AtomSpace much more flexible than SQL.
+It does seem to make things more readable, more "natural" in Atomese.
+It provides more flexibility: you can create and destroy joins at any
+time. You can join some rows but not others. All the usual stuff that
+makes the AtomSpace more flexible than SQL.
 
 For just right now, we punt, and store the naked PRIMARY/FOREIGN KEY
 values as Atoms in the AtomSpace. It feels ugly, but it works.
@@ -118,7 +126,7 @@ Table Schemas
 SQL table definitions provide a definition of the columns of that
 table.  These are imported into the AtomSpace, where they are used
 to find the names of the columns, and the types. (Note that the
-`EvaluationLink` above does not contain the column names.)
+`EvaluationLink` example above does not contain the column names.)
 Below is the current mapping.
 
 The SQL column names are recorded as
@@ -126,11 +134,11 @@ The SQL column names are recorded as
 The type of each variable *aka* column is given.
 ```
     Signature
-       Predicate "tablename"
+       Predicate "tablename"    ;; Replace by actual table name.
        List
           TypedVariable
               Variable "name of column 1"
-              Type 'ConceptNode  ;; For SQL text/varchar
+              Type 'ConceptNode ;; For SQL text/varchar
           TypedVariable
               Variable "name of column 2"
               Type 'NumberNode  ;; For SQL numbers
