@@ -6,7 +6,7 @@ link_directories(
 	"@CMAKE_INSTALL_PREFIX@/lib/opencog/"
 )
 set(ATOMSPACE_AUTOMAP_LIBRARIES
-	persist-fdi
+	persist-bridge
 )
 
 set(ATOMSPACE_AUTOMAP_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")

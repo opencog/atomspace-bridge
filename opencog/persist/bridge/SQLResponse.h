@@ -33,7 +33,7 @@
 #include <opencog/atoms/core/TypeNode.h>
 
 #include "llapi.h"
-#include "ForeignStorage.h"
+#include "BridgeStorage.h"
 
 using namespace opencog;
 
@@ -46,7 +46,7 @@ using namespace opencog;
  * Methods are intended to be inlined, so as to avoid subroutine
  * call overhead.  It's supposed to be a fast convenience wrapper.
  */
-class ForeignStorage::Response
+class BridgeStorage::Response
 {
 	public:
 		LLRecordSet *rs;

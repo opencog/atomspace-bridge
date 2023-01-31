@@ -21,7 +21,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog persist))
-(use-modules (opencog persist-foreign))
+(use-modules (opencog persist-bridge))
 
 ; ----------------------------------------------------
 ; Declare the location of the database.
@@ -34,7 +34,7 @@
 ; The following works if you set up the AtomSpace Unit tests correctly:
 ; postgres:///opencog_test?user=opencog_tester&password=cheese
 ;
-(define flystore (ForeignStorageNode "postgres:///flybase"))
+(define flystore (BridgeStorageNode "postgres:///flybase"))
 
 ; Open it.
 (cog-open flystore)
@@ -42,7 +42,7 @@
 (cog-connected? flystore)
 
 ; Load all of the table definitions.
-(define table-descs (cog-foreign-load-tables flystore))
+(define table-descs (cog-bridge-load-tables flystore))
 
 ; How many table descriptions were loaded?
 (length table-descs)
@@ -164,7 +164,7 @@
 ; It can be fetdhed directly, as follows. We happen to "just know" that
 ; (Number 464522) is a valid "genotype_id". So go get that row, only.
 
-(cog-foreign-load-row flystore
+(cog-bridge-load-row flystore
 	(Predicate "genotype")
 	(Variable "genotype_id")
 	(Number 464522))

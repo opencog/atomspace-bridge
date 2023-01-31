@@ -1,5 +1,5 @@
 #
-# Master AtomSpace Foreign SQL Interface CMake file.
+# Master AtomSpace to SQL Bridge Interface CMake file.
 #
 # General organization:
 # -- check for different compilers, OS'es
@@ -20,7 +20,7 @@ IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 	CMAKE_POLICY(SET CMP0045 NEW)
 ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 
-PROJECT(atomspace-automap)
+PROJECT(atomspace-bridge)
 
 # ----------------------------------------------------------
 # User-modifiable options. Feel free to change these!
@@ -217,8 +217,8 @@ SET(CPACK_GENERATOR "DEB")
 SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The AtomSpace Foreign SQL Interface")
-SET(CPACK_PACKAGE_NAME "atomspace-automap-dev")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The AtomSpace to SQL Bridge Interface")
+SET(CPACK_PACKAGE_NAME "atomspace-bridge-dev")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
 SET(CPACK_PACKAGE_VERSION "${SEMANTIC_VERSION}-${UTC_DATE}")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
@@ -248,7 +248,7 @@ FIND_PACKAGE(Doxygen)
 # ===================================================================
 # Show a summary of what we found, what we will do.
 
-SUMMARY_ADD("AtomSpace-AutoMap" "AtomSpace Foreign SQL Interface" HAVE_ATOMSPACE AND HAVE_PGSQL)
+SUMMARY_ADD("AtomSpace-AutoMap" "AtomSpace to SQL Bridge Interface" HAVE_ATOMSPACE AND HAVE_PGSQL)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 

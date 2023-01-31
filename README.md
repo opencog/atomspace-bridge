@@ -184,7 +184,7 @@ Examples of accessing data in a foreign database.
 ```
 ; Describe where it is located.
 (define foreign-db
-   (ForeignStorageNode "postgres://example.com/foo?user=foo&passwd=bar"))
+   (BridgeStorageNode "postgres://example.com/foo?user=foo&passwd=bar"))
 
 ; Open it.
 (cog-open foreign-db)
@@ -211,7 +211,7 @@ Examples of accessing data in a foreign database.
 
 ; The fetch-query function is already built into the base, core
 ; AtomSpace. We could also create custom functions:
-(automap-get-row "gene.allele" (Concept "CG7069"))
+(cog-bridge-get-row "gene.allele" (Concept "CG7069"))
 
 ; Custom functions are not appealing, since they don't work
 ; with the rest of the StorageNode and ProxNode infrastructure.

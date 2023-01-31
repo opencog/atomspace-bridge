@@ -19,7 +19,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 textual-ports))
 (use-modules (opencog) (opencog persist))
-(use-modules (opencog persist-foreign))
+(use-modules (opencog persist-bridge))
 
 (format #t "SQL Table Browser Demo\n\n")
 (format #t "Enter a Postgres DB to open:\n")
@@ -33,10 +33,10 @@
 (if (equal? 0 (string-length db-str))
 	(set! db-str "postgres:///flybase"))
 
-(define flystore (ForeignStorageNode db-str))
+(define flystore (BridgeStorageNode db-str))
 (format #t "Opening ~A\n" flystore)
 (cog-open flystore)
-(define table-descs (cog-foreign-load-tables flystore))
+(define table-descs (cog-bridge-load-tables flystore))
 (format #t "Loaded ~A table descriptions\n" (length table-descs))
 
 ;; ---------------------------------------------------
@@ -139,10 +139,10 @@
 (define (load-joins TBL COL-STR VALU)
 
 	; Load if from SQL. For example:
-	;    (cog-foreign-load-rows flystore
+	;    (cog-bridge-load-rows flystore
 	;        (Predicate "genotype") (Variable "genotype_id") (Number 464522))
 	(define lro
-		(cog-foreign-load-rows flystore TBL (Variable COL-STR) VALU))
+		(cog-bridge-load-rows flystore TBL (Variable COL-STR) VALU))
 	(if (< 0 (length lro))
 		(format #t "Loaded ~A joining rows for '~A.~A=~A'\n"
 			(length lro) (cog-name TBL) COL-STR (cog-name VALU)))

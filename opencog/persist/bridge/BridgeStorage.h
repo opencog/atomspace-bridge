@@ -1,9 +1,9 @@
 /*
  * FILE:
- * opencog/persist/automap/ForeignStorage.h
+ * opencog/persist/bridge/BridgeStorage.h
  *
  * FUNCTION:
- * Foreign SQL interfaces.
+ * AtomSpace to SQL Bridge interface.
  *
  * HISTORY:
  * Copyright (c) 2022 Linas Vepstas <linasvepstas@gmail.com>
@@ -45,7 +45,7 @@ namespace opencog
  *  @{
  */
 
-class ForeignStorage : public StorageNode
+class BridgeStorage : public StorageNode
 {
 	private:
 		std::string _uri;
@@ -80,10 +80,10 @@ class ForeignStorage : public StorageNode
 		void load_joined_rows(const Handle&);
 
 	public:
-		ForeignStorage(std::string uri);
-		ForeignStorage(const ForeignStorage&) = delete; // disable copying
-		ForeignStorage& operator=(const ForeignStorage&) = delete; // disable assignment
-		virtual ~ForeignStorage();
+		BridgeStorage(std::string uri);
+		BridgeStorage(const BridgeStorage&) = delete; // disable copying
+		BridgeStorage& operator=(const BridgeStorage&) = delete; // disable assignment
+		virtual ~BridgeStorage();
 
 		void open(void);
 		void close(void);
@@ -123,14 +123,14 @@ class ForeignStorage : public StorageNode
 		HandleSeq load_rows(const Handle&, const Handle&, const Handle&);
 };
 
-class ForeignStorageNode : public ForeignStorage
+class BridgeStorageNode : public BridgeStorage
 {
 	public:
-		ForeignStorageNode(Type t, const std::string&& uri) :
-			ForeignStorage(std::move(uri))
+		BridgeStorageNode(Type t, const std::string&& uri) :
+			BridgeStorage(std::move(uri))
 		{}
-		ForeignStorageNode(const std::string&& uri) :
-			ForeignStorage(std::move(uri))
+		BridgeStorageNode(const std::string&& uri) :
+			BridgeStorage(std::move(uri))
 		{}
 
 		void setAtomSpace(AtomSpace* as)
@@ -143,8 +143,8 @@ class ForeignStorageNode : public ForeignStorage
 		static Handle factory(const Handle&);
 };
 
-NODE_PTR_DECL(ForeignStorageNode)
-#define createForeignStorageNode CREATE_DECL(ForeignStorageNode)
+NODE_PTR_DECL(BridgeStorageNode)
+#define createBridgeStorageNode CREATE_DECL(BridgeStorageNode)
 
 /** @}*/
 } // namespace opencog

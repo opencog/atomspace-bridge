@@ -1,1 +1,1 @@
-ADD_SUBDIRECTORY (automap)
+ADD_SUBDIRECTORY (bridge)

@@ -1,9 +1,9 @@
 /*
  * FILE:
- * opencog/persist/automap/SQLReader.cc
+ * opencog/persist/bridge/SQLReader.cc
  *
  * FUNCTION:
- * Foreign SQL to AtomSpace interfaces.
+ * Bridge SQL to AtomSpace interfaces.
  *
  * HISTORY:
  * Copyright (c) 2022 Linas Vepstas <linasvepstas@gmail.com>
@@ -33,7 +33,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Node.h>
 
-#include "ForeignStorage.h"
+#include "BridgeStorage.h"
 
 #include "SQLResponse.h"
 #include "ll-pg-cxx.h"
@@ -43,7 +43,7 @@ using namespace opencog;
 /* ================================================================ */
 
 /** get_server_version() -- get version of postgres server */
-void ForeignStorage::get_server_version(void)
+void BridgeStorage::get_server_version(void)
 {
 	Response rp(conn_pool);
 	rp.exec("SHOW server_version_num;");
@@ -53,7 +53,7 @@ void ForeignStorage::get_server_version(void)
 
 /* ================================================================ */
 
-Handle ForeignStorage::load_one_table(const std::string& tablename)
+Handle BridgeStorage::load_one_table(const std::string& tablename)
 {
 	// Simple query. Placeholder, see notes for what we really need.
 	// udt_name is better than data_type
@@ -94,7 +94,7 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	return tabs;
 }
 
-HandleSeq ForeignStorage::load_tables(void)
+HandleSeq BridgeStorage::load_tables(void)
 {
 	if (not _is_open)
 		throw RuntimeException(TRACE_INFO,
@@ -140,7 +140,7 @@ HandleSeq ForeignStorage::load_tables(void)
 ///
 /// There should be one and only one such structure in RAM.
 ///
-Handle ForeignStorage::get_row_desc(const Handle& tablename)
+Handle BridgeStorage::get_row_desc(const Handle& tablename)
 {
 	if (not tablename->is_type(PREDICATE_NODE))
 		throw RuntimeException(TRACE_INFO,
@@ -160,7 +160,7 @@ Handle ForeignStorage::get_row_desc(const Handle& tablename)
 /// If will have the general form
 ///    SELECT clo1, col2, ... FROM tablename
 /// with the column names take from the table signature.
-std::string ForeignStorage::make_select(const Handle& tablename)
+std::string BridgeStorage::make_select(const Handle& tablename)
 {
 	std::string buff = "SELECT ";
 
@@ -185,7 +185,7 @@ std::string ForeignStorage::make_select(const Handle& tablename)
 /// `tablename` must be a PredicateNode attached to a Signature
 /// describing the the table.
 /// `select` must be an SQL SELECT statement.
-void ForeignStorage::load_selected_rows(const Handle& tablename,
+void BridgeStorage::load_selected_rows(const Handle& tablename,
                                         const std::string& select)
 {
 	_num_queries++;
@@ -204,7 +204,7 @@ void ForeignStorage::load_selected_rows(const Handle& tablename,
 /// Load all rows in the table identified by the tablename.
 /// tablename must be a PredicateNode holding the name of an SQL table,
 /// and the signature of that table must already be known (loaded).
-void ForeignStorage::load_table_data(const Handle& tablename)
+void BridgeStorage::load_table_data(const Handle& tablename)
 {
 	load_selected_rows(tablename, make_select(tablename) + ";");
 }
@@ -212,7 +212,7 @@ void ForeignStorage::load_table_data(const Handle& tablename)
 /* ================================================================ */
 
 /// Load all rows in all tables holding this column name.
-void ForeignStorage::load_column(const Handle& hv)
+void BridgeStorage::load_column(const Handle& hv)
 {
 	// Starting at the variable, walk upwards, searching for
 	// Signatures holding this column.
@@ -241,7 +241,7 @@ void ForeignStorage::load_column(const Handle& hv)
 ///
 /// This creates an SQL 'SELECT ... WHERE ...' statement, and runs it.
 ///
-void ForeignStorage::select_where(const Handle& entry,     // Concept or Number
+void BridgeStorage::select_where(const Handle& entry,     // Concept or Number
                                   const Handle& coldesc,   // TypedVariable
                                   const Handle& tablename) // PredicateNode
 {
@@ -265,7 +265,7 @@ void ForeignStorage::select_where(const Handle& entry,     // Concept or Number
 /// column name for that entry, and the table name.
 /// Converts the column name into a column descriptor and calls the
 /// function above.
-HandleSeq ForeignStorage::load_rows(const Handle& tablename, // PredicateNode
+HandleSeq BridgeStorage::load_rows(const Handle& tablename, // PredicateNode
                                     const Handle& colname,   // VariableNode
                                     const Handle& entry)     // Concept or Number
 {
@@ -300,7 +300,7 @@ HandleSeq ForeignStorage::load_rows(const Handle& tablename, // PredicateNode
 /// This is effectively assuming that `colname` is either a FOREIGN KEY
 /// or a PRIMARY KEY in some tables somewhere. We join *everything* with
 /// that key, and load it into the AtomSpace.
-void ForeignStorage::load_join(const Handle& entry,     // Concept or Number
+void BridgeStorage::load_join(const Handle& entry,     // Concept or Number
                                const Handle& coldesc)   // TypedVariable
 {
 	if (not coldesc->is_type(TYPED_VARIABLE_LINK))
@@ -320,7 +320,7 @@ void ForeignStorage::load_join(const Handle& entry,     // Concept or Number
 /// that it belongs to. Then join all other rows in all other tables
 /// having that same column name.
 ///
-void ForeignStorage::load_joined_rows(const Handle& entry)
+void BridgeStorage::load_joined_rows(const Handle& entry)
 {
 	// Que pasa?
 	// arow is of the form  (List (Concept "foo") (Concept "bar"))
@@ -354,16 +354,16 @@ void ForeignStorage::load_joined_rows(const Handle& entry)
 
 /* ================================================================ */
 
-void ForeignStorage::getAtom(const Handle&)
+void BridgeStorage::getAtom(const Handle&)
 {
 }
 
-Handle ForeignStorage::getLink(Type, const HandleSeq&)
+Handle BridgeStorage::getLink(Type, const HandleSeq&)
 {
 	return Handle::UNDEFINED;
 }
 
-void ForeignStorage::fetchIncomingSet(AtomSpace* as, const Handle& h)
+void BridgeStorage::fetchIncomingSet(AtomSpace* as, const Handle& h)
 {
 	// Multiple different cases are to be handled:
 	// 1) h is a PredicateNode, and so we assume it is the name of a table.
@@ -386,41 +386,41 @@ void ForeignStorage::fetchIncomingSet(AtomSpace* as, const Handle& h)
 			"Not supported. Try loading a predicate or variable.\n");
 }
 
-void ForeignStorage::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
+void BridgeStorage::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
 {
 	// Ignore the type spec.
 	fetchIncomingSet(as, h);
 }
 
-void ForeignStorage::storeAtom(const Handle&, bool synchronous)
+void BridgeStorage::storeAtom(const Handle&, bool synchronous)
 {
 }
 
-void ForeignStorage::removeAtom(AtomSpace*, const Handle&, bool recursive)
+void BridgeStorage::removeAtom(AtomSpace*, const Handle&, bool recursive)
 {
 }
 
-void ForeignStorage::storeValue(const Handle& atom, const Handle& key)
+void BridgeStorage::storeValue(const Handle& atom, const Handle& key)
 {
 }
 
-void ForeignStorage::updateValue(const Handle&, const Handle&, const ValuePtr&)
+void BridgeStorage::updateValue(const Handle&, const Handle&, const ValuePtr&)
 {
 }
 
-void ForeignStorage::loadValue(const Handle& atom, const Handle& key)
+void BridgeStorage::loadValue(const Handle& atom, const Handle& key)
 {
 }
 
-void ForeignStorage::loadType(AtomSpace*, Type)
+void BridgeStorage::loadType(AtomSpace*, Type)
 {
 }
 
-void ForeignStorage::loadAtomSpace(AtomSpace*)
+void BridgeStorage::loadAtomSpace(AtomSpace*)
 {
 }
 
-void ForeignStorage::storeAtomSpace(const AtomSpace*)
+void BridgeStorage::storeAtomSpace(const AtomSpace*)
 {
 }
 

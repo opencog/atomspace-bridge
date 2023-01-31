@@ -1,5 +1,5 @@
 /*
- * opencog/persist/automap/ForeignPersistSCM.h
+ * opencog/persist/bridge/BridgePersistSCM.h
  *
  * Copyright (c) 2020 Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -33,7 +33,7 @@ namespace opencog
  *  @{
  */
 
-class ForeignPersistSCM
+class BridgePersistSCM
 {
 private:
 	static void* init_in_guile(void*);
@@ -43,8 +43,8 @@ private:
 	AtomSpacePtr _as;
 
 public:
-	ForeignPersistSCM(AtomSpace*);
-	~ForeignPersistSCM();
+	BridgePersistSCM(AtomSpace*);
+	~BridgePersistSCM();
 
 	HandleSeq do_load_tables(const Handle&);
 	HandleSeq do_load_rows(const Handle&, const Handle&, const Handle&, const Handle&);
@@ -55,7 +55,7 @@ public:
 }  // namespace
 
 extern "C" {
-void opencog_persist_fdi_init(void);
+void opencog_persist_bridge_init(void);
 };
 
 #endif // _OPENCOG_FOREIGN_PERSIST_SCM_H

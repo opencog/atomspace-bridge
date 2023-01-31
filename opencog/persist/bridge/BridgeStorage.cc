@@ -1,9 +1,9 @@
 /*
  * FILE:
- * opencog/persist/automap/ForeignStorage.cc
+ * opencog/persist/bridge/BridgeStorage.cc
  *
  * FUNCTION:
- * Foreign SQL to AtomSpace interfaces.
+ * AtomSpace to SQL Bridge interfaces.
  *
  * HISTORY:
  * Copyright (c) 2022 Linas Vepstas <linasvepstas@gmail.com>
@@ -32,7 +32,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
 
-#include "ForeignStorage.h"
+#include "BridgeStorage.h"
 
 #include "ll-pg-cxx.h"
 
@@ -44,7 +44,7 @@ using namespace opencog;
 /* ================================================================ */
 // Constructors
 
-ForeignStorage::ForeignStorage(std::string uri) :
+BridgeStorage::BridgeStorage(std::string uri) :
 	StorageNode(FOREIGN_STORAGE_NODE, std::move(uri))
 {
 	const char *yuri = _name.c_str();
@@ -61,7 +61,7 @@ ForeignStorage::ForeignStorage(std::string uri) :
 	_is_open = false;
 }
 
-ForeignStorage::~ForeignStorage()
+BridgeStorage::~BridgeStorage()
 {
 	close();
 }
@@ -69,7 +69,7 @@ ForeignStorage::~ForeignStorage()
 /* ================================================================ */
 // Connections and opening
 
-void ForeignStorage::enlarge_conn_pool(int delta, const char* uri)
+void BridgeStorage::enlarge_conn_pool(int delta, const char* uri)
 {
 	if (0 >= delta) return;
 	for (int i=0; i<delta; i++)
@@ -82,7 +82,7 @@ void ForeignStorage::enlarge_conn_pool(int delta, const char* uri)
 }
 
 // Public function
-void ForeignStorage::open(void)
+void BridgeStorage::open(void)
 {
 	// User might call us twice. If so, ignore the second call.
 	if (_is_open) return;
@@ -105,7 +105,7 @@ void ForeignStorage::open(void)
 printf("Connected to Postgres server version %d\n", _server_version);
 }
 
-void ForeignStorage::close(void)
+void BridgeStorage::close(void)
 {
 	if (not _is_open) return;
 
@@ -113,7 +113,7 @@ void ForeignStorage::close(void)
 	_is_open = false;
 }
 
-bool ForeignStorage::connected(void)
+bool BridgeStorage::connected(void)
 {
 	if (0 == _is_open) return false;
 	if (0 == _initial_conn_pool_size) return false;
@@ -127,7 +127,7 @@ bool ForeignStorage::connected(void)
 	return have_connection;
 }
 
-void ForeignStorage::close_conn_pool(void)
+void BridgeStorage::close_conn_pool(void)
 {
    // flushStoreQueue();
 
@@ -145,17 +145,17 @@ void ForeignStorage::close_conn_pool(void)
 /// barrier really are performed before before all the writes after
 /// the barrier.
 ///
-void ForeignStorage::barrier(AtomSpace* as)
+void BridgeStorage::barrier(AtomSpace* as)
 {
 }
 
 /* ================================================================ */
 
-void ForeignStorage::clear_stats(void)
+void BridgeStorage::clear_stats(void)
 {
 }
 
-std::string ForeignStorage::monitor(void)
+std::string BridgeStorage::monitor(void)
 {
 	std::string rs;
 	if (not _is_open)
@@ -173,11 +173,11 @@ std::string ForeignStorage::monitor(void)
 	return rs;
 }
 
-void ForeignStorage::print_stats(void)
+void BridgeStorage::print_stats(void)
 {
 	printf("%s\n", monitor().c_str());
 }
 
-DEFINE_NODE_FACTORY(ForeignStorageNode, FOREIGN_STORAGE_NODE)
+DEFINE_NODE_FACTORY(BridgeStorageNode, BRIDGE_STORAGE_NODE)
 
 /* ============================= END OF FILE ================= */
