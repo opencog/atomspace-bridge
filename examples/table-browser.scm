@@ -53,7 +53,7 @@
 		(cog-outgoing-set varli))
 	(format #t "\n"))
 
-; ROW is assumed to be an EvaluationLink
+; ROW is assumed to be an EdgeLink
 (define (print-row ROW)
 	(define table (gar ROW))
 	(define naked (gdr ROW))
@@ -236,7 +236,7 @@
 ;; ---------------------------------------------------
 ; Given a row in a table, ask user to pick a column from that table.
 ; Then bound to a dialog that shows all other tables with the same column.
-; Here, ROW is expected to be an EvaluationLink holding the row.
+; Here, ROW is expected to be an EdgeLink holding the row.
 (define (edge-walk ROW)
 	(print-row ROW)
 	(format #t "\nEnter a column name. Enter 'q' to return to the main prompt.\n")
@@ -274,7 +274,7 @@
 	(when (nil? curr-rows)
 		(format #t "This may take a few minutes for large tables\n")
 		(set! curr-rows
-			(cog-incoming-by-type (Predicate curr-table) 'Evaluation)))
+			(cog-incoming-by-type (Predicate curr-table) 'EdgeLink)))
 
 	(define nrows (length curr-rows))
 	(define rr (random nrows))

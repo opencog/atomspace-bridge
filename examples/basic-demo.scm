@@ -227,7 +227,7 @@
 (for-each
 	(lambda (PRED)
 		(format #t "Found ~A \trows in table ~A\n"
-			(cog-incoming-size-by-type PRED 'EvaluationLink)
+			(cog-incoming-size-by-type PRED 'EdgeLink)
 			(cog-name PRED)))
 	(cog-get-atoms 'PredicateNode))
 

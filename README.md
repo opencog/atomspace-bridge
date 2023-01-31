@@ -59,9 +59,9 @@ Here's a sketch for a generic mapping. This could work for *any*
 SQL database.
 
 For each row in some table `tablename`, create a conventional
-Atomese [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink).
+Atomese [EdgeLink](https://wiki.opencog.org/w/EdgeLink).
 ```
-   Evaluation                ; A single row in the table.
+   Edge                      ; A single row in the table.
       Predicate "tablename"  ; Replace by actual name of table.
       List                   ; This list is one row in the table.
          Concept "thing"     ; Entry in that column, if its a string.
@@ -88,23 +88,23 @@ AtomSpace, and instead just makes direct links between table rows.
 So, for example:
 
 ```
-   Evaluation
+   Edge
       Predicate "some join relation"
       Set
-         Evaluation ;;; row in the host table
+         Edge   ;;; row in the host table
             Predicate "some tablename"
             List ...
 
-         Evaluation   ;; row in the target table.
+         Edge   ;; row in the target table.
             Predicate "another tablename"
             List ...
 
-         Evaluation   ;; if more than two tables are joined.
+         Edge   ;; if more than two tables are joined.
             Predicate "yet another tablename"
             List ...
 ```
 See the OpenCog wiki:
-* [EvaluationLink](https://wiki.opencog.org/w/EvaluationLink)
+* [EdgeLink](https://wiki.opencog.org/w/EdgeLink)
 * [PredicateNode](https://wiki.opencog.org/w/PredicateNode)
 
 From what I can tell, the above alternate form uses about the same
@@ -126,7 +126,7 @@ Table Schemas
 SQL table definitions provide a definition of the columns of that
 table.  These are imported into the AtomSpace, where they are used
 to find the names of the columns, and the types. (Note that the
-`EvaluationLink` example above does not contain the column names.)
+`EdgeLink` example above does not contain the column names.)
 Below is the current mapping.
 
 The SQL column names are recorded as
@@ -206,7 +206,7 @@ Examples of accessing data in a foreign database.
 ; StorageNodes do have the ability to run generic queries, and
 ; we could, in principle, translate at least some of the simpler
 ; Atomese queries into SQL, and run those.
-(fetch-query (Meet (Evaluation (Predicate "gene.allele")
+(fetch-query (Meet (Edge (Predicate "gene.allele")
     (List (Concept "CG7069") (Glob "rest of the row")))))
 
 ; The fetch-query function is already built into the base, core

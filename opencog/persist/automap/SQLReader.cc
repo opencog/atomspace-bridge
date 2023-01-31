@@ -79,7 +79,7 @@ Handle ForeignStorage::load_one_table(const std::string& tablename)
 	// Create a signature of the general form:
 	//
 	//    Signature
-	//       Evaluation
+	//       Edge
 	//          Predicate "gene.allele"
 	//          List
 	//             TypedVariable
@@ -284,7 +284,7 @@ HandleSeq ForeignStorage::load_rows(const Handle& tablename, // PredicateNode
 	HandleSeq anon_rows(entry->getIncomingSetByType(LIST_LINK));
 	for (const Handle& naked : anon_rows)
 	{
-		Handle maybe = _atom_space->get_link(EVALUATION_LINK, tablename, naked);
+		Handle maybe = _atom_space->get_link(EDGE_LINK, tablename, naked);
 		if (maybe) found.emplace_back(maybe);
 	}
 
@@ -324,7 +324,7 @@ void ForeignStorage::load_joined_rows(const Handle& entry)
 {
 	// Que pasa?
 	// arow is of the form  (List (Concept "foo") (Concept "bar"))
-	// trow is (Evaluation (Predicate "table") arow)
+	// trow is (Edge (Predicate "table") arow)
 	// tablename is (Predicate "table")
 	// varli is (VariableList (TypedVariale ...) (TypedVariable ...))
 	//
@@ -337,7 +337,7 @@ void ForeignStorage::load_joined_rows(const Handle& entry)
 	HandleSeq anonrows(entry->getIncomingSetByType(LIST_LINK));
 	for (const Handle& arow : anonrows)
 	{
-		HandleSeq trows(arow->getIncomingSetByType(EVALUATION_LINK));
+		HandleSeq trows(arow->getIncomingSetByType(EDGE_LINK));
 		for (const Handle& row : trows)
 		{
 			const Handle& tablename(row->getOutgoingAtom(0));

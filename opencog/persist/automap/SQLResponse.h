@@ -219,7 +219,7 @@ class ForeignStorage::Response
 			if (0 < elts.size())
 			{
 				Handle row = as->add_link(LIST_LINK, HandleSeq(elts));
-				as->add_link(EVALUATION_LINK, pred, row);
+				as->add_link(EDGE_LINK, pred, row);
 				nrows++;
 			}
 			return false;
