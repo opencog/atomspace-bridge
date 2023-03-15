@@ -5,6 +5,16 @@
 ; also work fine with the AtomSpace Python bindings.
 ;
 ; Step 0: Install and configure Postgres.
+;         $ sudo apt install postgresql
+;         $ sudo service postgresql start
+;         $ sudo su - postgres
+;         $ psql template1
+;         Replace `opencog` below with your username.
+;         template1=# CREATE ROLE opencog WITH SUPERUSER;
+;         template1=# ALTER ROLE opencog WITH LOGIN;
+;         template1=# exit
+;         $ exit
+;         $ createdb opencog
 ;
 ; Step 1: Download the flybase DB from off the net.
 ;         Caution: it is large -- a 13GB compressed file!
@@ -12,7 +22,7 @@
 ;
 ; Step 2: Load it into postgres. At the shell:
 ;            createdb flybase
-;            zcat FB2022_06.sql.gz |psql flybase
+;            time zcat FB2022_06.sql.gz |psql flybase
 ;         This took 5 hours, on my (rather old) system.
 ;
 ; Step 3: Start a guile REPL shell. At the guile prompt, cut-n-paste
