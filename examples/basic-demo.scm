@@ -226,19 +226,32 @@
 ; * "dbxrefprop"               -- 7368898 (7.4 million)
 ; * "feature_synonym"          -- 7219870 (7.2 million)
 ;
-; In total, there are 458 million rows, in all tables.
+; In total, there are 458 million rows, in all tables. (458126237 total)
 ;
 ; Loading the `featureloc` table requires approx 250 GB RAM to load.
 ; It will take approx 35 min on a fast machine, so about 46K rows/sec.
 ; It uses approx 340M Atoms, so 3.4 Atoms/row, and 730 Bytes/Atom.
 ;
-; The average for all but the largest tables (the "smaller-tables" list,
-; below) works out to 540 Bytes/Atom. These contain a total of 66584583
-; (about 67 million) rows, for an average of 2.893 Atoms/row.
+; The average for all but the 9 largest tables (the "smaller-tables"
+; list, below) works out to 540 Bytes/Atom. These contain a total of
+; 66584583 (about 67 million) rows, for an average of 2.893 Atoms/row.
 ;
-; Based on these two endpoints, loading the entire dataset requires
-; approx 700 GB RAM. (The number of Atoms/row will decrease, as most
-; Atoms are shared by multiple rows.)
+; Loading all but the top 7 tables requires
+; 166.7 GB RAM, 111033762 rows, 2.754 Atoms/row, 545 Bytes/Atom.
+;
+; Loading all but the top 5 tables requires
+; 254.0 GB RAM, 170564498 rows, 2.76 Atoms/row, 540 Bytes/Atom.
+;
+; Loading all but the top 4 tables requires
+; 318.0 GB RAM, 216332910 rows, 2.66 Atoms/row, 552 Bytes/Atom.
+;
+; Loading all but the top 3 tables requires
+; 432.9 GB RAM, 289236305 rows, 2.63 Atoms/row, 570 Bytes/Atom.
+;
+; Loading additional tables *reduces* the number of Atoms/row, with
+; the average trending to 2.6 Atoms/row. This is because most Atoms
+; are shared by multiple rows. Assuming 570 Bytes/Atom, this works
+; works out to about 680 GBytes RAM total.
 ; -----------------------------------
 
 ; List of all of the tables.
