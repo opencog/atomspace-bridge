@@ -214,19 +214,25 @@
 ;
 ; Some of the large tables are:
 ; * "featureloc" -- 97643867 (97 million) rows, 340M Atoms, 250GB RSS
-; * "feature" -- 90989753 (90 million) rows
-; * "feature_relationship" -- 72903395 (73 million) rows
-; * "library_featureprop" -- 45768412 (46 million) rows
-; * "feature_dbxref" -- 33640286 (34 million) rows
-; * "library_feature" -- 25483996 (25 million) rows
-; * "featureprop" -- 18965183 (18 million) rows
-; * "dbxrefprop" -- 7368898 (7.4 million) rows
-; * "feature_synonym" -- 7219870
+; * "feature"                  -- 90989753 (90 million) rows
+; * "analysisfeature"          -- 77900179 (78 million) rows
+; * "feature_relationship"     -- 72903395 (73 million) rows
+; * "library_featureprop"      -- 45768412 (46 million) rows
+; * "feature_dbxref"           -- 33640286 (34 million) rows
+; * "dbxref"                   -- 25890450 (26 million)
+; * "library_feature"          -- 25483996 (25 million)
+; * "featureprop"              -- 18965183 (18 million)
+; * "feature_relationshipprop" -- 10450127 (10 million)
+; * "dbxrefprop"               -- 7368898 (7.4 million)
+; * "feature_synonym"          -- 7219870 (7.2 million)
 ;
 ; Loading the `featureloc` table requires approx 250 GB RAM to load.
 ; It will take approx 35 min on a fast machine, so about 46K rows/sec.
 ; It uses approx 340M Atoms, so 3.4 Atoms/row, and 730 Bytes/Atom.
-
+;
+; The average for most tables works out to 564 Bytes/Atom,
+; at 2.6 Atoms/row.
+;
 
 ; All of the tables.
 (define all-tables (cog-get-atoms 'PredicateNode))
@@ -235,9 +241,11 @@
 (define big-tables (list
 	(Predicate "featureloc")
 	(Predicate "feature")
+	(Predicate "analysisfeature")
 	(Predicate "feature_relationship")
 	(Predicate "library_featureprop")
 	(Predicate "feature_dbxref")
+	(Predicate "dbxref")
 	(Predicate "library_feature")
 	(Predicate "featureprop")
 ))
@@ -263,24 +271,33 @@
 				(format #t "... Done loading ~A rows in ~A secs\n"
 					num-rows elapsed)
 				(when (< 20 elapsed)
-					(format #t "... Rate: ~8.1F rows/sec\n"
-						(/ num-rows elapsed)))
+					(format #t "... Rate: ~8,1F rows/sec\n"
+						(exact->inexact (/ num-rows elapsed))))
 			)
 			; (format #t "\nStatus:\n")
 			; (display (monitor-storage flystore))
 			(format #t "----------------------\n"))
 		TABLE-LIST))
 
-; Load everything except the big ones
+; Load everything except the big ones. This requires 104GBytes of RAM.
+; It will load about 193 million Atoms. Loading the remaining tables
+; requies in excess of 500 GB RAM.
 (load-tables smaller-tables)
 
-; Here's a row-count monitor:
+; Print a report about the loaded tables:
 (for-each
 	(lambda (PRED)
 		(format #t "Found ~A \trows in table ~A\n"
 			(cog-incoming-size-by-type PRED 'EdgeLink)
 			(cog-name PRED)))
 	(cog-get-atoms 'PredicateNode))
+
+; Total number of loaded rows:
+(define all-sizes (map cog-incoming-size (cog-get-atoms 'PredicateNode)))
+(fold + 0 all-sizes)
+
+; Atoms per row:
+(/ (count-all) (fold + 0.0 all-sizes))
 
 : Time to say goodnight.
 ; Close the connection to storage.
