@@ -23,7 +23,7 @@
 ; Step 2: Load it into postgres. At the shell:
 ;            createdb flybase
 ;            time zcat FB2022_06.sql.gz |psql flybase
-;         This took 5 hours, on my (rather old) system.
+;         This will take 5 hours on older systems; an hour on the newest.
 ;
 ; Step 3: Start a guile REPL shell. At the guile prompt, cut-n-paste
 ;         the commands below. Observe, make sure they work.
@@ -195,43 +195,84 @@
 ; ----------------------------------------------------
 ; Let's get greedy, and just try to load *everything*.
 ; This will turn out to be a mistake. But let's make it.
+;
 ; Be prepared to kill the guile process, else it will use up all the RAM
 ; on your system. The OOM killer will eventually run, but, until it does,
 ; your mouse and keyboard will be unresponsive. So kill it manually,
 ; before it gets out of control.
+;
+; Because this takes a long time, it is more convenient to run it
+; from a CogServer shell. This frees up the main guile prompt for
+; poking around and exploring, while the loading happens in a different
+; thread. This is the preferred way to interact, for any kind of large,
+; long-running job.  Do this like so:
 
-(define num-tables (length (cog-get-atoms 'PredicateNode)))
-(define tabno 0)
-(for-each
-	(lambda (PRED)
-		(define start-time (current-time))
-		(set! tabno (+ 1 tabno))
-		(format #t "Start loading table ~A/~A  ~A\n"
-			tabno num-tables (cog-name PRED))
-		(fetch-incoming-set PRED)
-		(format #t "... Done loading in ~A secs\n" (- (current-time) start-time))
-		(format #t "\nStatus:\n")
-		(display (monitor-storage flystore))
-		(format #t "----------------------\n"))
-	(cog-get-atoms 'PredicateNode))
-
-; Well, the above will take a long time.  And use up a LOT of RAM.
-; More than 100 GB so far, and still going. The `featureprop` table
-; is quite large, it has 18965184 records.
-
-; Use this to count the number of records:
-(cog-incoming-size (Predicate "featureprop"))
-
-; The above count is accurate only *after* loading!
-
-; Perhaps its better to do the loading from another window. So here:
 (use-modules (opencog cogserver))
 (start-cogserver)
 
-; Then `rlwrap telnet localhost 17001` and run the load from there.
-; That way, the main guile prompt is available for monitoring progress.
-; This is the preferred way to interact, for any kind of large,
-; long-running jobs.
+; Now, `rlwrap telnet localhost 17001` and run the big load from there.
+;
+; Some of the large tables are:
+; * "featureloc" -- 97643867 (97 million) rows, 340M Atoms, 250GB RSS
+; * "feature" -- 90989753 (90 million) rows
+; * "feature_relationship" -- 72903395 (73 million) rows
+; * "library_featureprop" -- 45768412 (46 million) rows
+; * "feature_dbxref" -- 33640286 (34 million) rows
+; * "library_feature" -- 25483996 (25 million) rows
+; * "featureprop" -- 18965183 (18 million) rows
+; * "dbxrefprop" -- 7368898 (7.4 million) rows
+; * "feature_synonym" -- 7219870
+;
+; Loading the `featureloc` table requires approx 250 GB RAM to load.
+; It will take approx 35 min on a fast machine, so about 46K rows/sec.
+; It uses approx 340M Atoms, so 3.4 Atoms/row, and 730 Bytes/Atom.
+
+
+; All of the tables.
+(define all-tables (cog-get-atoms 'PredicateNode))
+(length all-tables)
+
+(define big-tables (list
+	(Predicate "featureloc")
+	(Predicate "feature")
+	(Predicate "feature_relationship")
+	(Predicate "library_featureprop")
+	(Predicate "feature_dbxref")
+	(Predicate "library_feature")
+	(Predicate "featureprop")
+))
+
+; All of the tables, except the largest ones.
+(define smaller-tables (atoms-subtract all-tables big-tables))
+
+; Function that loads all tables in TABLE-LIST
+; It loads them one at a time, instead of in parallel,
+; so it will be slower than it could be.
+; It prints some performance stats for ech table.
+(define (load-tables TABLE-LIST)
+	(define tabno 0)
+	(for-each
+		(lambda (PRED)
+			(define start-time (current-time))
+			(set! tabno (+ 1 tabno))
+			(format #t "Start loading table ~A/~A  ~A\n"
+				tabno (length TABLE-LIST) (cog-name PRED))
+			(fetch-incoming-set PRED)
+			(let* ((elapsed (- (current-time) start-time))
+					(num-rows (cog-incoming-size PRED)))
+				(format #t "... Done loading ~A rows in ~A secs\n"
+					num-rows elapsed)
+				(when (< 20 elapsed)
+					(format #t "... Rate: ~8.1F rows/sec\n"
+						(/ num-rows elapsed)))
+			)
+			; (format #t "\nStatus:\n")
+			; (display (monitor-storage flystore))
+			(format #t "----------------------\n"))
+		TABLE-LIST))
+
+; Load everything except the big ones
+(load-tables smaller-tables)
 
 ; Here's a row-count monitor:
 (for-each
@@ -240,13 +281,6 @@
 			(cog-incoming-size-by-type PRED 'EdgeLink)
 			(cog-name PRED)))
 	(cog-get-atoms 'PredicateNode))
-
-; Aieeee!
-;
-; The `featureloc` table is also large. -- it has 97643867 (97 million)
-; rows. Pulling in the first 32 million rows took about 100 GB of RAM.
-; Clearly, loading all of it requires more RAM, or a much more compact
-; representation.
 
 : Time to say goodnight.
 ; Close the connection to storage.
