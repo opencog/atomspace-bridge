@@ -226,18 +226,26 @@
 ; * "dbxrefprop"               -- 7368898 (7.4 million)
 ; * "feature_synonym"          -- 7219870 (7.2 million)
 ;
+; In total, there are 458 million rows, in all tables.
+;
 ; Loading the `featureloc` table requires approx 250 GB RAM to load.
 ; It will take approx 35 min on a fast machine, so about 46K rows/sec.
 ; It uses approx 340M Atoms, so 3.4 Atoms/row, and 730 Bytes/Atom.
 ;
-; The average for most tables works out to 564 Bytes/Atom,
-; at 2.6 Atoms/row.
+; The average for all but the largest tables (the "smaller-tables" list,
+; below) works out to 540 Bytes/Atom. These contain a total of 66584583
+; (about 67 million) rows, for an average of 2.893 Atoms/row.
 ;
+; Based on these two endpoints, loading the entire dataset requires
+; approx 700 GB RAM. (The number of Atoms/row will decrease, as most
+; Atoms are shared by multiple rows.)
+; -----------------------------------
 
-; All of the tables.
+; List of all of the tables.
 (define all-tables (cog-get-atoms 'PredicateNode))
 (length all-tables)
 
+; The big tables account for 391 million rows.
 (define big-tables (list
 	(Predicate "featureloc")
 	(Predicate "feature")
@@ -251,6 +259,7 @@
 ))
 
 ; All of the tables, except the largest ones.
+; These contain 66584583 (67 million) rows.
 (define smaller-tables (atoms-subtract all-tables big-tables))
 
 ; Function that loads all tables in TABLE-LIST
@@ -279,9 +288,8 @@
 			(format #t "----------------------\n"))
 		TABLE-LIST))
 
-; Load everything except the big ones. This requires 104GBytes of RAM.
-; It will load about 193 million Atoms. Loading the remaining tables
-; requies in excess of 500 GB RAM.
+; Load everything except the big ones. This requires 104 GBytes of RAM.
+; It will load about 193 million Atoms. There are about 67 million rows.
 (load-tables smaller-tables)
 
 ; Print a report about the loaded tables:
