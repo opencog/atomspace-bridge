@@ -27,6 +27,8 @@ The following are desired features:
   a bulk import/export, but rather will access individual rows, columns
   and tables on an as-needed basis. This would allow the AtomSpace to
   work with datasets that are too big to fit in RAM.
+* Adherence to the [AtomSpace Sensory](https://github.com/opencog/sensory)
+  perception-action API for general agents.
 
 At this time, only Postgres is supported.
 
