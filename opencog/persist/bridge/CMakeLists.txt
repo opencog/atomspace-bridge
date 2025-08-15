@@ -10,9 +10,8 @@ ADD_LIBRARY (persist-bridge SHARED
 # ADD_DEPENDENCIES(persist-bridge opencog_atom_types atomspace)
 
 TARGET_LINK_LIBRARIES(persist-bridge
-	persist
-	storage-types
-	atomspace
+	${ATOMSPACE_STORAGE_LIBRARIES}
+	${ATOMSPACE_LIBRARIES}
 	${PGSQL_LIBRARIES}
 )
 
