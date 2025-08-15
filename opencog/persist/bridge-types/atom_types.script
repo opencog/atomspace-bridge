@@ -1,0 +1,7 @@
+//
+// Script for generating the BridgeStorageNode atom types.
+//
+FOREIGN_STORAGE_NODE <- STORAGE_NODE
+BRIDGE_STORAGE_NODE <- STORAGE_NODE
+
+// That's all folks!  Nothing more is needed here!

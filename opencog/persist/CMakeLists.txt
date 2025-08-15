@@ -1,1 +1,2 @@
+ADD_SUBDIRECTORY (bridge-types)
 ADD_SUBDIRECTORY (bridge)

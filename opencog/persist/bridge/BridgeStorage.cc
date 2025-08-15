@@ -31,6 +31,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
+#include <opencog/persist/bridge-types/atom_types.h>
 
 #include "BridgeStorage.h"
 
