@@ -7,6 +7,15 @@
 (use-modules (opencog))
 (use-modules (opencog persist))
 (use-modules (opencog bridge-config))
+
+; Load the C library that calls the classserver to load the types.
+(load-extension
+	(string-append opencog-ext-path-persist-bridge-types "libpersist-bridge-types")
+	"persist_bridge_types_init")
+
+; Load the persist-bridge types scheme bindings
+(load-from-path "opencog/persist/bridge-types/persist_bridge_types.scm")
+
 (load-extension (string-append opencog-ext-path-persist-bridge "libpersist-bridge") "opencog_persist_bridge_init")
 
 (export cog-bridge-load-tables cog-bridge-load-rows)
